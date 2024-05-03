@@ -40,6 +40,8 @@ public:
 
     void setVisited(bool state);
     void setPath(Edge* newPath);
+    void setLat(double newLat);
+    void setLon(double newLon);
     Edge* addPipe(Vertex *dest, double distance);
 private:
     int id;
@@ -107,7 +109,7 @@ protected:
 
 
 public:
-    map<string,int> nameToCode;
+    unordered_map<string,int> nameToCode;
 
 };
 
@@ -160,6 +162,14 @@ inline void Vertex::setPath(Edge* newPath) {
     this->path = newPath;
 }
 
+inline void Vertex::setLat(double newLat)
+{
+    this->lat=newLat;
+}
+
+inline void Vertex::setLon(double newLon) {
+    this->lat=newLon;
+}
 
 /********************** Edge  ****************************/
 inline Edge::Edge(Vertex *orig, Vertex *dest, double w): orig(orig), dest(dest), distance(w) {}
@@ -223,6 +233,7 @@ inline bool Graph::addVertex(int id, const string &name, double latitude, double
     if(findVertex(id) != nullptr) return false;
     auto* newVertex = new Vertex(id, name,latitude,longitude);
     vertexSet[id] = newVertex;
+    nameToCode[name] = id;
     return true;
 }
 
