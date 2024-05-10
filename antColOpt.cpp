@@ -6,7 +6,7 @@ pair<double,vector<int>> runACO(Graph& g)
 {
     g.cleanGraph();
     size_t totalNodes = g.getNumVertex();
-    double batchSize = round(totalNodes /2);
+    double batchSize = 1000;//TODO round(totalNodes /2);
 
     double bestDistance = DBL_MAX;
     vector<int> bestPath = {};
@@ -25,24 +25,27 @@ pair<double,vector<int>> runACO(Graph& g)
 
         //Update pheromones
         double pheromoneDelta = g.getPheromoneDropoff() / distance;
-        size_t lastPointIndex = path.size()-1;
-        for (int index = 0; i< lastPointIndex; i++)
-        {
-            Edge* edge = g.findEdge(path[index],path[index+1]);
-            edge->setPheromones( edge->getPheromones() + pheromoneDelta);
+        size_t lastPointIndex = path.size() - 1;
+        for (int index = 0; i < lastPointIndex; i++) {
+            Edge *edge = g.findEdge(path[index], path[index + 1]);
+            edge->setPheromones(edge->getPheromones() + pheromoneDelta);
         }
-
     }
+
     return {bestDistance,bestPath};
 
 }
 
 pair<double,vector<int>> getAntPath(Graph& g){
-
-
+    //TODO maybe make seperate func
+    for (pair<int,Vertex*> vertex : g.getVertexSet())
+    {
+        vertex.second->setVisited(false);
+    }
     struct Ant ant;
     ant.visited.push_back(0);
     ant.current = g.findVertex(0);
+    ant.current->setVisited(true);
     size_t totalNodes = g.getNumVertex();
     while(ant.visited.size() < totalNodes)
     {
@@ -75,6 +78,7 @@ pair<double,vector<int>> getAntPath(Graph& g){
                 ant.distance += neighbor->getDistance();
                 ant.current = dest;
                 ant.visited.push_back(dest->getId());
+                dest->setVisited(true);
                 break;
             }
         }

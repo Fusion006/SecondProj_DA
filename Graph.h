@@ -83,7 +83,7 @@ protected:
     Vertex* dest; // destination vertex
     double distance; // edge weight, can also be used for distance
     bool selected = false;
-    double pheromones = 0;
+    double pheromones = 1;
     double transitionProbability = 0;
 
     Vertex *orig;
@@ -246,7 +246,7 @@ void Graph::cleanGraph() {
         unordered_map<int,Edge*> edges = vertex.second->getAdj();
         for (pair<int,Edge*> edge : edges)
         {
-            edge.second->setPheromones(0);
+            edge.second->setPheromones(1);
             edge.second->setSelected(false);
         }
     }

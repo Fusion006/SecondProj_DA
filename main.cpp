@@ -24,11 +24,9 @@ Graph buildSimpleGraph(const string& filepath){
 
             g.addVertex(stoi(pointA),pointA);
             g.addVertex(stoi(pointB),pointB);
-            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
-            {
-                cout << "Error in reading simple Graph couldn't add edge";
-                exit(EXIT_FAILURE);
-            }
+            g.addEdge(stoi(pointA), stoi(pointB), stod(distance));
+
+            g.addEdge(stoi(pointB), stoi(pointA), stod(distance));
         }
     }else{
         cout << "Error in reading simple Graph file not found";
@@ -119,10 +117,13 @@ int main() {
     Graph g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/tourism.csv");
     //Graph g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/","edges_25.csv");
     //completeGraph(g);
+    cout<<"Hello world\n";
+
     pair<double,vector<int>> r = runACO(g);
     for (int i : r.second){
         cout<<"->" << i << endl;
     }
-    cout<<"Hello world";
+    cout<<"BYE world\n";
+
     return 0;
 }
