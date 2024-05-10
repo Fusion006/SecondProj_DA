@@ -1,6 +1,10 @@
 #include <iostream>
 #include "Graph.h"
+#include "haversine.h"
 using namespace std;
+
+
+
 
 Graph buildSimpleGraph(const string& filepath){
     Graph g;
@@ -87,7 +91,7 @@ Graph buildComplexGraph(const string& dirpath, const string& filename)
     return g;
 }
 
-void completeGraph(Graph g)
+void completeGraph(const Graph& g)
 {
     unordered_map<int,Vertex*> vertexSet = g.getVertexSet();
     for (pair<int,Vertex*> firstPair : vertexSet)
@@ -97,7 +101,9 @@ void completeGraph(Graph g)
         {
             if (firstPair.first != secondPair.first)
             {
-                if(g.addEdge(firstPair.first, secondPair.first, 0))//TODO update distance
+                double dist = haversine(firstPair.second->getLat(), firstPair.second->getLon(),
+                                        secondPair.second->getLat(), secondPair.second->getLon());
+                if(g.addEdge(firstPair.first, secondPair.first, dist))
                 {
                     if(firstPair.second->getAdj().size()-1 == g.getNumVertex()) break;
                 }
