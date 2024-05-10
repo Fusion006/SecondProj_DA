@@ -42,7 +42,7 @@ public:
     void setPath(Edge* newPath);
     void setLat(double newLat);
     void setLon(double newLon);
-    Edge* addPipe(Vertex *dest, double distance);
+    Edge* addEdge(Vertex *dest, double distance);
 private:
     int id;
     string name;
@@ -67,14 +67,24 @@ public:
     [[nodiscard]] inline double getDistance() const;
     [[nodiscard]] inline Vertex* getOrig() const;
     [[nodiscard]] inline Edge* getReverse() const;
+    [[nodiscard]] inline double getPheromones() const;
+    [[nodiscard]] inline double getTransitionProbability() const;
+
 
     void setSelected(bool state);
     void setReverse(Edge* reverse);
+    void setPheromones(double newPheromones);
+    void setTransitionProbability(double newProb);
+
+
+    void evaporatePheromones(double persistenceRate);
 
 protected:
     Vertex* dest; // destination vertex
     double distance; // edge weight, can also be used for distance
     bool selected = false;
+    double pheromones = 0;
+    double transitionProbability = 0;
 
     Vertex *orig;
     Edge *reverse = nullptr;
@@ -90,7 +100,7 @@ class Graph {
 public:
     Graph();
     [[nodiscard]] inline Vertex *findVertex(const int &id) const;
-    [[nodiscard]] inline Edge *findPipe(const int &source, const int &target) const;
+    [[nodiscard]] inline Edge *findEdge(const int &source, const int &target) const;
 
     bool addVertex(int id, const string &name, double latitude = INVALID_COORDINATE, double longitude = INVALID_COORDINATE);
 
@@ -103,6 +113,10 @@ public:
 
     [[nodiscard]] inline size_t getNumVertex() const;
     [[nodiscard]] inline unordered_map<int,Vertex*> getVertexSet() const;
+    inline void cleanGraph();
+    inline double getPheromoneDropoff();
+    inline void evaporatePheromones(double persistenceRate);
+
 
 protected:
     std::unordered_map<int,Vertex*> vertexSet;    // vertex set
@@ -119,7 +133,7 @@ public:
  * Auxiliary function to add an outgoing edge to a vertex (this),
  * with a given destination vertex (d) and edge weight (w).
  */
-inline Edge* Vertex::addPipe(Vertex *dest, double distance) {
+inline Edge* Vertex::addEdge(Vertex *dest, double distance) {
     auto newEdge = new Edge(this, dest, distance);
     adj[dest->id] = newEdge;
     return newEdge;
@@ -185,13 +199,34 @@ Vertex * Edge::getOrig() const {
 Edge *Edge::getReverse() const {
     return this->reverse;
 }
+double Edge::getPheromones() const {
+    return this->pheromones;
+}
+double Edge::getTransitionProbability() const {
+    return this->transitionProbability;
+}
+
+
 
 inline void Edge::setSelected(bool state) {
     this->selected = state;
 }
-inline void Edge::setReverse(Edge *reversePipe) {
-    this->reverse = reversePipe;
+inline void Edge::setReverse(Edge *reverseEdge) {
+    this->reverse = reverseEdge;
 }
+
+inline void Edge::setPheromones(double  newPheromones) {
+    this->pheromones = newPheromones;
+}
+
+inline void Edge::evaporatePheromones(double persistenceRate){
+    this->pheromones *= persistenceRate;
+}
+
+inline void Edge::setTransitionProbability(double newProb) {
+    this->transitionProbability = newProb;
+}
+
 
 /********************** Graph  ****************************/
 
@@ -201,6 +236,45 @@ size_t Graph::getNumVertex() const {
 }
 unordered_map<int,Vertex*> Graph::getVertexSet() const {
     return vertexSet;
+}
+
+void Graph::cleanGraph() {
+    for (pair<int,Vertex*> vertex : this->vertexSet)
+    {
+        vertex.second->setVisited(false);
+        vertex.second->setPath(nullptr);
+        unordered_map<int,Edge*> edges = vertex.second->getAdj();
+        for (pair<int,Edge*> edge : edges)
+        {
+            edge.second->setPheromones(0);
+            edge.second->setSelected(false);
+        }
+    }
+}
+
+double Graph::getPheromoneDropoff()
+{
+    double res = 0;
+    for (pair<int,Vertex*> vertex : this->vertexSet)
+    {
+        for (pair<int,Edge*> edge : vertex.second->getAdj())
+        {
+            res += edge.second->getDistance();
+        }
+    }
+    return res;
+}
+
+
+void Graph::evaporatePheromones(double persistenceRate) {
+    for (pair<int,Vertex*> vertex : this->vertexSet)
+    {
+        unordered_map<int,Edge*> edges = vertex.second->getAdj();
+        for (pair<int,Edge*> edge : edges)
+        {
+            edge.second->evaporatePheromones(persistenceRate);
+        }
+    }
 }
 
 /*
@@ -222,7 +296,7 @@ inline bool Graph::addEdge(const int &sourceid, const int &destid, double dist) 
     auto v2 = findVertex(destid);
     if (v1 == nullptr || v2 == nullptr)
         return false;
-    v1->addPipe(v2, dist);
+    v1->addEdge(v2, dist);
     return true;
 }
 
@@ -237,7 +311,7 @@ inline bool Graph::addVertex(int id, const string &name, double latitude, double
     return true;
 }
 
-Edge *Graph::findPipe(const int &source, const int &target) const {
+Edge *Graph::findEdge(const int &source, const int &target) const {
     auto vsource = findVertex(source);
     if (vsource == nullptr) {
         return nullptr;

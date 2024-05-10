@@ -1,6 +1,8 @@
 #include <iostream>
 #include "Graph.h"
 #include "haversine.h"
+#include "antColOpt.h"
+
 using namespace std;
 
 
@@ -114,11 +116,13 @@ void completeGraph(const Graph& g)
 
 int main() {
 
-    //Graph g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/shipping.csv");
-    Graph g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/","edges_25.csv");
-    completeGraph(g);
-
-
+    Graph g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/tourism.csv");
+    //Graph g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/","edges_25.csv");
+    //completeGraph(g);
+    pair<double,vector<int>> r = runACO(g);
+    for (int i : r.second){
+        cout<<"->" << i << endl;
+    }
     cout<<"Hello world";
     return 0;
 }
