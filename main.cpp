@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include "Graph.h"
 #include "Backtracking.h"
 #include "haversine.h"
@@ -109,66 +110,105 @@ void completeGraph(Graph& g)
     }
 }
 
-void Algorithm_Menu(Graph& g){
+void Run(Graph& g){
     string order;
     while(true){
         cout << endl << "What do you wish to do?" << endl << endl <<
              "Please insert:" << endl <<
              "'1' to execute a backtracking algorithm;" << endl <<
              "'2' to execute a triangular approximation Heuristic algorithm;" << endl <<
-             "'3' to execute a different Heuristic algorithm;" << endl <<
-             "'4' to resolve the TSP problem using a non-fully connected graph;" << endl <<
+             "'3' to execute our Heuristic algorithm;" << endl <<
+             "'4' to execute our Heuristic algorithm for non-fully connected graphs;" << endl <<
              "'close' to exit the program." << endl << endl <<
-             "DISCLAIMER: If you choose the option 1 it is advised to use the Toy graphs!" << endl;
+             "DISCLAIMER: If you choose the option 1 it is advised to use only the Toy graphs!" << endl;
+
         getline(cin >> ws, order);
+
         if(order == "close"){
             cout << "CLosing now..." << endl;
             return;
         }
+
         else if(order == "1"){
             cout << tspBT(g) << endl;
         }
-        else if(order == "2"){}
-        else if(order == "3"){}
+
+        else if(order == "2"){
+
+        }
+
+        else if(order == "3"){
+
+        }
+
+        else if(order == "4"){
+
+        }
+
         else cout << "Insert a valid number!" << endl;
     }
 }
 void Graph_Menu(const string &graph_type, Graph& g){
     string option;
     while(option.empty()){
+
         if(graph_type == "Toy"){
-            cout << "Choose one of the available Toy graphs:" << endl <<
-                 "'1' for the shipping graph." << endl <<
-                 "'2' for the stadiums graph." << endl <<
-                 "'3' for the tourism graph." << endl;
+            cout << "Choose one of the available Toy graphs[shipping/stadiums/tourism]:" << endl;
+
             getline(cin >> ws, option);
-            if(option == "1") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/shipping.csv");
-            else if(option == "2") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/stadiums.csv");
-            else if(option == "3") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/tourism.csv");
+
+            if(option == "shipping") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/shipping.csv");
+
+            else if(option == "stadiums") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/stadiums.csv");
+
+            else if(option == "tourism") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/tourism.csv");
+
+            else {
+                cout << "Insert a valid graph!" << endl;
+                option = "";
+                continue;
+            }
         }
-        else if(graph_type == "Medium-Sized"){
-            cout << "Choose one of the available Medium-Sized graphs: (put only the number.For example, '25')" << endl;
+
+        else if(graph_type == "Medium"){
+            vector<string> numOfNodes = {"25", "50", "75", "100", "200", "300", "400", "500", "600", "700", "800", "900"};
+            cout << "Choose the number of nodes[25/50/75/100/200/300/400/500/600/700/800/900]:" << endl;
             getline(cin >> ws, option);
+
+            if (find(numOfNodes.begin(), numOfNodes.end(), option) == numOfNodes.end()) {
+                cout << "Insert a valid number!" << endl;
+                option = "";
+                continue;
+            }
 
             string file = "edges_" + option + ".csv";
             g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file);
         }
-        else if(graph_type == "Real-Life"){
+
+        else if(graph_type == "Real"){
+            option = "";
             //TODO
         }
     }
-    completeGraph(g);
-    Algorithm_Menu(g);
 }
+
 int main() {
     Graph g;
     string graph_type;
     std::cout << "Welcome!" << std::endl;
     while(graph_type.empty()){
-        cout << "Which type of graph do you want to use['Toy'/'Medium-Sized'/'Real-Life' Graph]:" << endl;
+        cout << "Which dataset do you want to use[Toy/Medium/Real]:" << endl;
+
         getline(cin >> ws, graph_type);
+
+        if (graph_type != "Toy" && graph_type != "Medium" && graph_type != "Real") {
+            cout << "Insert a valid dataset!" << endl;
+            graph_type = "";
+        }
     }
     Graph_Menu(graph_type, g);
+    completeGraph(g);
+    Run(g);
 
     return 0;
 }
