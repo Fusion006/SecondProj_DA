@@ -34,7 +34,7 @@ Graph buildSimpleGraph(const string& filepath){
     return g;
 }
 
-Graph buildComplexGraph(const string& dirpath, const string& filename)
+Graph buildComplexGraph(const string& dirpath, const string& filename, const int& numOfNodes)
 {
     Graph g;
     ifstream edgesFile(dirpath+filename);
@@ -42,6 +42,7 @@ Graph buildComplexGraph(const string& dirpath, const string& filename)
     if (edgesFile.is_open())
     {
         getline(edgesFile,line);
+        //TODO Apenas ler o numero de nodes pedido
         while (getline(edgesFile,line))
         {
             istringstream stringline(line);
@@ -110,7 +111,7 @@ void completeGraph(Graph& g)
     }
 }
 
-void Run(Graph& g){
+void Run(Graph& g, Graph& gCompleted){
     string order;
     while(true){
         cout << endl << "What do you wish to do?" << endl << endl <<
@@ -182,7 +183,10 @@ void Graph_Menu(const string &graph_type, Graph& g){
             }
 
             string file = "edges_" + option + ".csv";
-            g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file);
+            int n = 0;
+            istringstream iss(option);
+            iss >> n;
+            g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
         }
 
         else if(graph_type == "Real"){
@@ -192,10 +196,25 @@ void Graph_Menu(const string &graph_type, Graph& g){
     }
 }
 
+void graphCopy(Graph& gOrigin, Graph& gCopy) {
+
+    for (pair<const int, Vertex *> pair : gOrigin.getVertexSet()) {
+        gCopy.addVertex(pair.second->getId(), pair.second->getName(), pair.second->getLat(), pair.second->getLon());
+    }
+
+    for (pair<const int, Vertex *> pair : gOrigin.getVertexSet()) {
+        for (auto pairEdge : pair.second->getAdj()) {
+            gCopy.addEdge(pairEdge.second->getOrig()->getId(), pairEdge.second->getDest()->getId(), pairEdge.second->getDistance());
+        }
+    }
+}
+
+
 int main() {
-    Graph g;
+    Graph g, gCompleted;
     string graph_type;
     std::cout << "Welcome!" << std::endl;
+
     while(graph_type.empty()){
         cout << "Which dataset do you want to use[Toy/Medium/Real]:" << endl;
 
@@ -206,9 +225,13 @@ int main() {
             graph_type = "";
         }
     }
+
     Graph_Menu(graph_type, g);
-    completeGraph(g);
-    Run(g);
+
+    graphCopy(g, gCompleted);
+    completeGraph(gCompleted);
+
+    Run(g, gCompleted);
 
     return 0;
 }
