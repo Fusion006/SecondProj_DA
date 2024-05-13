@@ -5,6 +5,19 @@
 #include "haversine.h"
 using namespace std;
 
+void graphCopy(Graph& gOrigin, Graph& gCopy) {
+
+    for (pair<const int, Vertex *> pair : gOrigin.getVertexSet()) {
+        gCopy.addVertex(pair.second->getId(), pair.second->getName(), pair.second->getLat(), pair.second->getLon());
+    }
+
+    for (auto pair : gOrigin.getVertexSet()) {
+        for (auto pairEdge : pair.second->getAdj()) {
+            if(gCopy.addEdge(pairEdge.second->getOrig()->getId(), pairEdge.second->getDest()->getId(), pairEdge.second->getDistance())) continue;
+        }
+    }
+}
+
 Graph buildSimpleGraph(const string& filepath){
     Graph g;
     ifstream ifile(filepath);
@@ -22,6 +35,11 @@ Graph buildSimpleGraph(const string& filepath){
             g.addVertex(stoi(pointA),pointA);
             g.addVertex(stoi(pointB),pointB);
             if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
+            {
+                cout << "Error in reading simple Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
+            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
             {
                 cout << "Error in reading simple Graph couldn't add edge";
                 exit(EXIT_FAILURE);
@@ -91,7 +109,7 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
     return g;
 }
 
-void completeGraph(Graph& g)
+void completeComplexGraph(Graph& g)
 {
     unordered_map<int,Vertex*> vertexSet = g.getVertexSet();
     for (pair<int,Vertex*> firstPair : vertexSet)
@@ -131,7 +149,7 @@ void Run(Graph& g, Graph& gCompleted){
         }
 
         else if(order == "1"){
-            cout << tspBT(g) << endl;
+            printBacktrackingSolution(g);
         }
 
         else if(order == "2"){
@@ -149,7 +167,7 @@ void Run(Graph& g, Graph& gCompleted){
         else cout << "Insert a valid number!" << endl;
     }
 }
-void Graph_Menu(const string &graph_type, Graph& g){
+void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
     string option;
     while(option.empty()){
 
@@ -169,6 +187,8 @@ void Graph_Menu(const string &graph_type, Graph& g){
                 option = "";
                 continue;
             }
+            graphCopy(g, gCompleted);
+            return;
         }
 
         else if(graph_type == "Medium"){
@@ -183,10 +203,10 @@ void Graph_Menu(const string &graph_type, Graph& g){
             }
 
             string file = "edges_" + option + ".csv";
-            int n = 0;
-            istringstream iss(option);
-            iss >> n;
+            int n = stoi(option);
             g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
+            graphCopy(g, gCompleted);
+            completeComplexGraph(gCompleted);
         }
 
         else if(graph_type == "Real"){
@@ -195,20 +215,6 @@ void Graph_Menu(const string &graph_type, Graph& g){
         }
     }
 }
-
-void graphCopy(Graph& gOrigin, Graph& gCopy) {
-
-    for (pair<const int, Vertex *> pair : gOrigin.getVertexSet()) {
-        gCopy.addVertex(pair.second->getId(), pair.second->getName(), pair.second->getLat(), pair.second->getLon());
-    }
-
-    for (pair<const int, Vertex *> pair : gOrigin.getVertexSet()) {
-        for (auto pairEdge : pair.second->getAdj()) {
-            gCopy.addEdge(pairEdge.second->getOrig()->getId(), pairEdge.second->getDest()->getId(), pairEdge.second->getDistance());
-        }
-    }
-}
-
 
 int main() {
     Graph g, gCompleted;
@@ -226,11 +232,7 @@ int main() {
         }
     }
 
-    Graph_Menu(graph_type, g);
-
-    graphCopy(g, gCompleted);
-    completeGraph(gCompleted);
-
+    Graph_Menu(graph_type, g, gCompleted);
     Run(g, gCompleted);
 
     return 0;

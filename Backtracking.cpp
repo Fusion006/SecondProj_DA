@@ -1,5 +1,5 @@
 #include "Backtracking.h"
-
+/*
 void backtrack(Graph& g, int currentVertex, double currentPath, vector<int>& currentPathList, double& minPath, vector<int>& path){
     if(currentPath >= minPath) return;
     currentPathList.push_back(currentVertex);
@@ -34,5 +34,95 @@ double tspBT(Graph& g){
     for(const auto& [id, vertex]: g.getVertexSet()) backtrack(g, id, 0, path, minPath, path);
     for(auto i : path) cout << i << endl;
     return minPath;
+}*/
+
+
+void printBacktrackingSolution(Graph& g) {
+    string order;
+    cout << "What is the root node?" << endl;
+    getline(cin >> ws, order);
+    if (order[0] < '0' || order[0] > '9') {
+        cout << "Invalid node" << endl;
+        return;
+    }
+    int rootV = stoi(order);
+    auto v = g.findVertex(rootV);
+
+    if (v == nullptr) {
+        cout << "The node selected does not exist!" << endl;
+        return;
+    }
+
+    unsigned int n = g.getNumVertex();
+    unsigned int path[n];
+    double minW = INT_MAX;
+    bool foundSolutionAlready = false;
+    double res = tspBT(g, n, path, minW, foundSolutionAlready, rootV, 0, 0, rootV);
+
+    if (!foundSolutionAlready) {
+        cout << "There is no solution for this graph." << endl;
+        return;
+    }
+
+    cout << "There is a path with cost " << res << " for this graph:" << endl;
+
+    for (auto node : path) {
+        cout << " " << node << " ==>";
+    }
+    cout << " " << rootV << endl;
 }
 
+double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root) {
+    //adicionar ao path o node atual
+    path[index] = atual;
+    unsigned int resPath[n];
+    double res;
+
+    //voltar ao 0
+    if (index == n - 1) {
+        double edgeW = g.findPipe(atual, root)->getDistance();
+        if (curentWeight + edgeW < minWeight) {
+            minWeight = curentWeight + edgeW;
+            foundASolutionAlready = false;
+        }
+        return edgeW;
+    }
+
+    //ver cada opcao valida
+    for (int i = 0; i < n; i++) {
+        if (i == atual || i == root) continue;
+
+        //ver se ja foi visitado
+        bool visited = false;
+        for (int j = 0; j < n; j++) {
+            if (path[j] == i) visited = true;
+        }
+        if (visited) {
+            continue;
+        }
+
+        //bounding
+        double edgeW = g.findPipe(atual, i)->getDistance();
+
+        if (curentWeight + edgeW <= minWeight) {
+            unsigned int updatedPath[n];
+            for (int j = 0; j < n; j++) {
+                updatedPath[j] = path[j];
+            }
+
+            double possibleRes = edgeW + tspBT(g, n, updatedPath, minWeight, foundASolutionAlready, i, index+1, curentWeight + edgeW, root);
+
+            if (possibleRes == minWeight - curentWeight && !foundASolutionAlready) {
+                if (atual == 0) foundASolutionAlready = true;
+                for (int j = 0; j < n; j++) {
+                    resPath[j] = updatedPath[j];
+                    res = possibleRes;
+                }
+            }
+        }
+    }
+    for (int j = 0; j < n; j++) {
+        path[j] = resPath[j];
+    }
+    return res;
+}
