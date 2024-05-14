@@ -4,6 +4,8 @@
 #include "Graph.h"
 #include "Backtracking.h"
 #include "haversine.h"
+#include "heuristic/antColOpt.h"
+
 using namespace std;
 
 void graphCopy(Graph& gOrigin, Graph& gCopy) {
@@ -35,6 +37,7 @@ Graph buildSimpleGraph(const string& filepath){
 
             g.addVertex(stoi(pointA),pointA);
             g.addVertex(stoi(pointB),pointB);
+
             double dist = stod(distance);
             int dista = static_cast<int>(round(dist * 10));
             if (!g.addEdge(stoi(pointA), stoi(pointB), dista))
@@ -181,7 +184,7 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
 
             if(option == "shipping") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/shipping.csv");
 
-            else if(option == "stadiums") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/testDouble.csv");
+            else if(option == "stadiums") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/stadiums.csv");
 
             else if(option == "tourism") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/tourism.csv");
 
@@ -223,7 +226,6 @@ int main() {
     Graph g, gCompleted;
     string graph_type;
     std::cout << "Welcome!" << std::endl;
-
     while(graph_type.empty()){
         cout << "Which dataset do you want to use[Toy/Medium/Real]:" << endl;
 

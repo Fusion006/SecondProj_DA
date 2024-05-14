@@ -83,7 +83,7 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, 
 
     //voltar ao 0
     if (index == n - 1) {
-        double edgeW = g.findPipe(atual, root)->getDistance();
+        double edgeW = g.findEdge(atual, root)->getDistance();
         if ((curentWeight + edgeW) < minWeight) {
             minWeight = curentWeight + edgeW;
             foundASolutionAlready = false;
@@ -105,7 +105,7 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, 
         }
 
         //bounding
-        double edgeW = g.findPipe(atual, i)->getDistance();
+        double edgeW = g.findEdge(atual, i)->getDistance();
 
         if ((curentWeight + edgeW) <= minWeight) {
             unsigned int updatedPath[n];

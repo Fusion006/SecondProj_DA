@@ -8,5 +8,9 @@ add_executable(Second_Proj_DA main.cpp
         Graph.cpp
         haversine.h
         haversine.cpp
-        antColOpt.cpp
-        Backtracking.cpp)
+        heuristic/antColOpt.cpp
+        heuristic/antColOpt.h
+        heuristic/christofides.h
+        heuristic/christofides.cpp
+        Backtracking.cpp
+        Backtracking.h)
