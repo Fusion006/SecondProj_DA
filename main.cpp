@@ -3,8 +3,9 @@
 #include "Graph.h"
 #include "Backtracking.h"
 #include "haversine.h"
-#include "antColOpt.h"
 #include "heuristic/antColOpt.h"
+#include "heuristic/christofides.h"
+
 
 using namespace std;
 
@@ -156,6 +157,7 @@ void Run(Graph& g, Graph& gCompleted){
 
         else if(order == "1"){
             printBacktrackingSolution(g);
+
         }
 
         else if(order == "2"){
@@ -163,6 +165,7 @@ void Run(Graph& g, Graph& gCompleted){
         }
 
         else if(order == "3"){
+            buildMST(g);
 
         }
 
