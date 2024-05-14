@@ -2,6 +2,7 @@
 #include "Graph.h"
 #include "haversine.h"
 #include "antColOpt.h"
+#include "heuristic/antColOpt.h"
 
 using namespace std;
 
