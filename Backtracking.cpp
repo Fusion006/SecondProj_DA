@@ -71,7 +71,7 @@ void printBacktrackingSolution(Graph& g) {
         return;
     }
 
-    cout << "There is a path with cost " << minW / 10 << " for this graph:" << endl;
+    cout << "There is a path with cost " << minW << " for this graph:" << endl;
 
     for (auto node : FinalPath) {
         cout << " " << node << " ==>";
@@ -117,7 +117,7 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPa
         //bounding
         double edgeW = g.findEdge(atual, i)->getDistance();
 
-        if ((curentWeight + edgeW) <= minWeight) {
+        if (abs((curentWeight + edgeW) - minWeight) < 0.0000001 || (curentWeight + edgeW) < minWeight) {
             unsigned int updatedPath[n];
             for (int j = 0; j < n; j++) {
                 updatedPath[j] = path[j];
@@ -125,7 +125,7 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPa
 
             double possibleRes = edgeW + tspBT(g, n, updatedPath, finalPath, minWeight, foundASolutionAlready, i, index+1, curentWeight + edgeW, root);
 
-            if ((possibleRes == minWeight - curentWeight) && !foundASolutionAlready) {
+            if ((abs(possibleRes - (minWeight - curentWeight)) < 0.0000001) && !foundASolutionAlready) {
                 if (atual == root) foundASolutionAlready = true;
                 for (int j = 0; j < n; j++) {
                     resPath[j] = updatedPath[j];

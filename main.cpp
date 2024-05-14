@@ -39,13 +39,13 @@ Graph buildSimpleGraph(const string& filepath){
             g.addVertex(stoi(pointB),pointB);
 
             double dist = stod(distance);
-            int dista = static_cast<int>(round(dist * 10));
-            if (!g.addEdge(stoi(pointA), stoi(pointB), dista))
+            //int dista = static_cast<int>(round(dist * 10));
+            if (!g.addEdge(stoi(pointA), stoi(pointB), dist))
             {
                 cout << "Error in reading simple Graph couldn't add edge";
                 exit(EXIT_FAILURE);
             }
-            if (!g.addEdge(stoi(pointB), stoi(pointA), dista))
+            if (!g.addEdge(stoi(pointB), stoi(pointA), dist))
             {
                 cout << "Error in reading simple Graph couldn't add edge";
                 exit(EXIT_FAILURE);
