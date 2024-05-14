@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include "Graph.h"
 #include "Backtracking.h"
 #include "haversine.h"
@@ -34,12 +35,14 @@ Graph buildSimpleGraph(const string& filepath){
 
             g.addVertex(stoi(pointA),pointA);
             g.addVertex(stoi(pointB),pointB);
-            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
+            double dist = stod(distance);
+            int dista = static_cast<int>(round(dist * 10));
+            if (!g.addEdge(stoi(pointA), stoi(pointB), dista))
             {
                 cout << "Error in reading simple Graph couldn't add edge";
                 exit(EXIT_FAILURE);
             }
-            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
+            if (!g.addEdge(stoi(pointB), stoi(pointA), dista))
             {
                 cout << "Error in reading simple Graph couldn't add edge";
                 exit(EXIT_FAILURE);
@@ -178,7 +181,7 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
 
             if(option == "shipping") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/shipping.csv");
 
-            else if(option == "stadiums") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/stadiums.csv");
+            else if(option == "stadiums") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/testDouble.csv");
 
             else if(option == "tourism") g = buildSimpleGraph("../datasets/Toy-Graphs/Toy-Graphs/tourism.csv");
 
