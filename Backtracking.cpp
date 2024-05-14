@@ -64,7 +64,13 @@ void printBacktrackingSolution(Graph& g) {
     }
     double minW = DBL_MAX;
     bool foundSolutionAlready = false;
+
+    auto start = chrono::high_resolution_clock::now();
+
     double res = tspBT(g, n, path, FinalPath, minW, foundSolutionAlready, rootV, 0, 0, rootV);
+
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double> duration = end - start;
 
     if (!foundSolutionAlready) {
         cout << "There is no solution for this graph." << endl;
@@ -77,6 +83,9 @@ void printBacktrackingSolution(Graph& g) {
         cout << " " << node << " ==>";
     }
     cout << " " << rootV << endl;
+
+    cout << "Execution time: " << duration.count() << " seconds." << endl;
+
 }
 
 double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPath[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root) {

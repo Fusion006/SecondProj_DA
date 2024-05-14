@@ -66,9 +66,8 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
     if (edgesFile.is_open())
     {
         getline(edgesFile,line);
-        //TODO Apenas ler o numero de nodes pedido
-        while (getline(edgesFile,line))
-        {
+        for (int i = 0; i < numOfNodes; i++) {
+            getline(edgesFile, line);
             istringstream stringline(line);
             string pointA; getline(stringline,pointA,',');
             string pointB; getline(stringline,pointB,',');
@@ -193,7 +192,9 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
                 option = "";
                 continue;
             }
+
             graphCopy(g, gCompleted);
+
             return;
         }
 
@@ -211,8 +212,8 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
             string file = "edges_" + option + ".csv";
             int n = stoi(option);
             g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
+            completeComplexGraph(g);
             graphCopy(g, gCompleted);
-            completeComplexGraph(gCompleted);
         }
 
         else if(graph_type == "Real"){
