@@ -1,6 +1,7 @@
 #include <stack>
 #include <iostream>
 #include "antColOpt.h"
+#include "../Graph.h"
 double getOutgoingDist(Vertex* vertex);
 double getTotalWeight(Vertex* vertex);
 

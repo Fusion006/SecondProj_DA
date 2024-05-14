@@ -12,7 +12,7 @@ using namespace std;
 
 void printBacktrackingSolution(Graph& g);
 
-double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root);
+double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPath[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root);
 
 
 #endif //SECOND_PROJ_DA_BACKTRACKING_H

@@ -58,27 +58,34 @@ void printBacktrackingSolution(Graph& g) {
     for (int i = 0; i < n; i++) {
         path[i] = rootV;
     }
+    unsigned int FinalPath[n];
+    for (int i = 0; i < n; i++) {
+        path[i] = rootV;
+    }
     double minW = DBL_MAX;
     bool foundSolutionAlready = false;
-    double res = tspBT(g, n, path, minW, foundSolutionAlready, rootV, 0, 0, rootV);
+    double res = tspBT(g, n, path, FinalPath, minW, foundSolutionAlready, rootV, 0, 0, rootV);
 
     if (!foundSolutionAlready) {
         cout << "There is no solution for this graph." << endl;
         return;
     }
 
-    cout << "There is a path with cost " << res / 10 << " for this graph:" << endl;
+    cout << "There is a path with cost " << minW / 10 << " for this graph:" << endl;
 
-    for (auto node : path) {
+    for (auto node : FinalPath) {
         cout << " " << node << " ==>";
     }
     cout << " " << rootV << endl;
 }
 
-double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root) {
+double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPath[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root) {
     //adicionar ao path o node atual
     path[index] = atual;
     unsigned int resPath[n];
+    for (int i = 0; i < n; i++) {
+        resPath[i] = path[i];
+    }
     double res = 0;
 
     //voltar ao 0
@@ -87,6 +94,9 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, 
         if ((curentWeight + edgeW) < minWeight) {
             minWeight = curentWeight + edgeW;
             foundASolutionAlready = false;
+            for (int i = 0; i < n; i++) {
+                finalPath[i] = path[i];
+            }
         }
         return edgeW;
     }
@@ -113,11 +123,8 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], double & minWeight, 
                 updatedPath[j] = path[j];
             }
 
-            double possibleRes = edgeW + tspBT(g, n, updatedPath, minWeight, foundASolutionAlready, i, index+1, curentWeight + edgeW, root);
-            //possibleRes = round(possibleRes * 10) / 10;
-            //double subtraction = round((minWeight - curentWeight) * 10) / 10;
-            double result = minWeight - curentWeight;
-            bool resbool = possibleRes == minWeight - curentWeight;
+            double possibleRes = edgeW + tspBT(g, n, updatedPath, finalPath, minWeight, foundASolutionAlready, i, index+1, curentWeight + edgeW, root);
+
             if ((possibleRes == minWeight - curentWeight) && !foundASolutionAlready) {
                 if (atual == root) foundASolutionAlready = true;
                 for (int j = 0; j < n; j++) {
