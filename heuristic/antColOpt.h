@@ -15,6 +15,8 @@ struct Ant{
 };
 
 pair<double,vector<int>> runACO(Graph& g);
-pair<double,vector<int>> getAntPath(Graph& g);
-double updateTransitionProbability(Edge* edge);
+Ant getAntPath(Graph& g, double bestDistance);
+double updateTransitionProbability(Edge* edge, double averageDist, double totalWeight);
+
+pair<double,vector<int>> runGreedy(Graph& g);
 #endif

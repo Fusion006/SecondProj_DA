@@ -37,12 +37,14 @@ public:
     [[nodiscard]] Edge* getPath() const;
 
 
-
     void setVisited(bool state);
     void setPath(Edge* newPath);
     void setLat(double newLat);
     void setLon(double newLon);
     Edge* addEdge(Vertex *dest, double distance);
+    Edge* addCopyEdge(Edge* copiedEdge);
+    void eraseCopyEdges();
+
 private:
     int id;
     string name;
@@ -67,11 +69,14 @@ public:
     [[nodiscard]] inline double getDistance() const;
     [[nodiscard]] inline Vertex* getOrig() const;
     [[nodiscard]] inline Edge* getReverse() const;
+    [[nodiscard]] inline bool getSelected() const;
+    [[nodiscard]] inline bool isUsed() const;
     [[nodiscard]] inline double getPheromones() const;
     [[nodiscard]] inline double getTransitionProbability() const;
 
 
     void setSelected(bool state);
+    void setUsed(bool state);
     void setReverse(Edge* reverse);
     void setPheromones(double newPheromones);
     void setTransitionProbability(double newProb);
@@ -83,6 +88,7 @@ protected:
     Vertex* dest; // destination vertex
     double distance; // edge weight, can also be used for distance
     bool selected = false;
+    bool used = false; //useful if we only want to use 'selected' edges but keep track of which edges have already been used
     double pheromones = 1;
     double transitionProbability = 0;
 
@@ -114,6 +120,7 @@ public:
     [[nodiscard]] inline size_t getNumVertex() const;
     [[nodiscard]] inline unordered_map<int,Vertex*> getVertexSet() const;
     inline void cleanGraph();
+    inline void eraseCopyEdges();
     inline double getPheromoneDropoff();
     inline void evaporatePheromones(double persistenceRate);
 
@@ -136,8 +143,41 @@ public:
 inline Edge* Vertex::addEdge(Vertex *dest, double distance) {
     auto newEdge = new Edge(this, dest, distance);
     adj[dest->id] = newEdge;
+
+    unordered_map<int,Edge*> adjs = dest->getAdj();
+    auto reverseEdge = adjs.find(this->id);
+    if ( reverseEdge != dest->getAdj().end() ) //if inverted edge exists
+    {
+        reverseEdge->second->setReverse(newEdge);
+        newEdge->setReverse(reverseEdge->second);
+    }
     return newEdge;
 }
+inline Edge* Vertex::addCopyEdge(Edge* copiedEdge) {
+    Vertex* dest = copiedEdge->getDest();
+    Edge* copyEdge = new Edge(copiedEdge->getOrig(), dest, copiedEdge->getDistance());
+    Edge* reverseCopyEdge = new Edge(dest, copiedEdge->getOrig(), copiedEdge->getDistance());
+
+    adj[(dest->id + 1) * -1] = copyEdge;
+    dest->adj[(this->id + 1) * -1] = reverseCopyEdge;
+
+    copyEdge->setReverse(reverseCopyEdge);
+    reverseCopyEdge->setReverse(copyEdge);
+
+    return copyEdge;
+}
+
+inline void Vertex::eraseCopyEdges() {
+    for (auto it = this->adj.begin(); it != this->adj.end();)
+    {
+        if (it->first < 0){
+            it = this->adj.erase(it);
+        }else{
+            it++;
+        }
+    }
+}
+
 
 inline string Vertex::getName() const {
     return this->name;
@@ -199,6 +239,12 @@ Vertex * Edge::getOrig() const {
 Edge *Edge::getReverse() const {
     return this->reverse;
 }
+bool Edge::getSelected() const {
+    return this->selected;
+}
+bool Edge::isUsed() const {
+    return this->used;
+}
 double Edge::getPheromones() const {
     return this->pheromones;
 }
@@ -210,6 +256,9 @@ double Edge::getTransitionProbability() const {
 
 inline void Edge::setSelected(bool state) {
     this->selected = state;
+}
+inline void Edge::setUsed(bool state) {
+    this->used = state;
 }
 inline void Edge::setReverse(Edge *reverseEdge) {
     this->reverse = reverseEdge;
@@ -248,7 +297,14 @@ void Graph::cleanGraph() {
         {
             edge.second->setPheromones(1);
             edge.second->setSelected(false);
+            edge.second->setUsed(false);
         }
+    }
+}
+
+void Graph::eraseCopyEdges(){
+    for (pair<int,Vertex*> vertex : this->vertexSet) {
+        vertex.second->eraseCopyEdges();
     }
 }
 
@@ -262,7 +318,7 @@ double Graph::getPheromoneDropoff()
             res += edge.second->getDistance();
         }
     }
-    return res;
+    return res/vertexSet.size();
 }
 
 
@@ -294,7 +350,7 @@ Vertex * Graph::findVertex(const int &id) const {
 inline bool Graph::addEdge(const int &sourceid, const int &destid, double dist) const {
     auto v1 = findVertex(sourceid);
     auto v2 = findVertex(destid);
-    if (v1 == nullptr || v2 == nullptr)
+    if (v1 == nullptr || v2 == nullptr || v1 == v2)
         return false;
     v1->addEdge(v2, dist);
     return true;

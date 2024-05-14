@@ -8,4 +8,6 @@ add_executable(Second_Proj_DA main.cpp
         Graph.cpp
         haversine.h
         haversine.cpp
-        antColOpt.cpp)
+        heuristic/antColOpt.cpp
+        heuristic/christofides.h
+        heuristic/christofides.cpp)
