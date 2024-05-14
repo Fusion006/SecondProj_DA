@@ -9,5 +9,8 @@ add_executable(Second_Proj_DA main.cpp
         haversine.h
         haversine.cpp
         heuristic/antColOpt.cpp
+        heuristic/antColOpt.h
         heuristic/christofides.h
-        heuristic/christofides.cpp)
+        heuristic/christofides.cpp
+        Backtracking.cpp
+        Backtracking.h)
