@@ -13,4 +13,8 @@ add_executable(Second_Proj_DA main.cpp
         heuristic/christofides.h
         heuristic/christofides.cpp
         Backtracking.cpp
-        Backtracking.h)
+        Backtracking.h
+        heuristic/Triangular.h
+        heuristic/Triangular.cpp
+        common.h
+        common.cpp)

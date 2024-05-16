@@ -39,19 +39,9 @@ double tspBT(Graph& g){
 
 void printBacktrackingSolution(Graph& g) {
     string order;
-    cout << "What is the root node?" << endl;
-    getline(cin >> ws, order);
-    if (order[0] < '0' || order[0] > '9') {
-        cout << "Invalid node!" << endl;
-        return;
-    }
-    int rootV = stoi(order);
-    auto v = g.findVertex(rootV);
-
-    if (v == nullptr) {
-        cout << "The node selected does not exist!" << endl;
-        return;
-    }
+    Vertex* v = nullptr;
+    int rootV = 0;
+    while (v == nullptr) v = getNodeInput(g, order, rootV);
 
     unsigned int n = g.getNumVertex();
     unsigned int path[n];
@@ -73,19 +63,16 @@ void printBacktrackingSolution(Graph& g) {
     chrono::duration<double> duration = end - start;
 
     if (!foundSolutionAlready) {
-        cout << "There is no solution for this graph." << endl;
+        cout << "There is no TSP solution for this graph." << endl;
         return;
     }
 
-    cout << "There is a path with cost " << minW << " for this graph:" << endl;
-
+    vector<int> resVec;
     for (auto node : FinalPath) {
-        cout << " " << node << " ==>";
+        resVec.push_back(node);
     }
-    cout << " " << rootV << endl;
 
-    cout << "Execution time: " << duration.count() << " seconds." << endl;
-
+    printPath(resVec, res, rootV, duration);
 }
 
 double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPath[], double & minWeight, bool& foundASolutionAlready, unsigned int atual, unsigned int index, double curentWeight, unsigned int root) {

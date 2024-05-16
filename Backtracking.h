@@ -2,6 +2,7 @@
 #define SECOND_PROJ_DA_BACKTRACKING_H
 
 #include "Graph.h"
+#include "heuristic/Triangular.h"
 #include <iostream>
 #include <climits>
 #include <cmath>

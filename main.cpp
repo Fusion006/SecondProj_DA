@@ -1,10 +1,10 @@
 #include <iostream>
 #include <algorithm>
-#include <cmath>
 #include "Graph.h"
 #include "Backtracking.h"
 #include "haversine.h"
 #include "heuristic/antColOpt.h"
+#include "heuristic/Triangular.h"
 
 using namespace std;
 
@@ -134,7 +134,7 @@ void completeComplexGraph(Graph& g)
     }
 }
 
-void Run(Graph& g, Graph& gCompleted){
+void Run(Graph& g){
     string order;
     while(true){
         cout << endl << "What do you wish to do?" << endl << endl <<
@@ -153,13 +153,9 @@ void Run(Graph& g, Graph& gCompleted){
             return;
         }
 
-        else if(order == "1"){
-            printBacktrackingSolution(g);
-        }
+        else if(order == "1") printBacktrackingSolution(g);
 
-        else if(order == "2"){
-
-        }
+        else if(order == "2") printTriangularTSPAproximation(g);
 
         else if(order == "3"){
 
@@ -172,7 +168,7 @@ void Run(Graph& g, Graph& gCompleted){
         else cout << "Insert a valid number!" << endl;
     }
 }
-void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
+void Graph_Menu(const string &graph_type, Graph& g){
     string option;
     while(option.empty()){
 
@@ -192,10 +188,6 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
                 option = "";
                 continue;
             }
-
-            graphCopy(g, gCompleted);
-
-            return;
         }
 
         else if(graph_type == "Medium"){
@@ -213,7 +205,6 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
             int n = stoi(option);
             g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
             completeComplexGraph(g);
-            graphCopy(g, gCompleted);
         }
 
         else if(graph_type == "Real"){
@@ -224,7 +215,7 @@ void Graph_Menu(const string &graph_type, Graph& g, Graph& gCompleted){
 }
 
 int main() {
-    Graph g, gCompleted;
+    Graph g;
     string graph_type;
     std::cout << "Welcome!" << std::endl;
     while(graph_type.empty()){
@@ -238,8 +229,8 @@ int main() {
         }
     }
 
-    Graph_Menu(graph_type, g, gCompleted);
-    Run(g, gCompleted);
+    Graph_Menu(graph_type, g);
+    Run(g);
 
     return 0;
 }
