@@ -2,12 +2,14 @@
 #define SECOND_PROJ_DA_BACKTRACKING_H
 
 #include "Graph.h"
+#include "common.h"
 #include "heuristic/Triangular.h"
 #include <iostream>
 #include <climits>
 #include <cmath>
 #include <cfloat>
 #include <chrono>
+
 using namespace std;
 
 
