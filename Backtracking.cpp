@@ -2,6 +2,14 @@
 
 
 void printBacktrackingSolution(Graph& g) {
+    /*
+    bool isFullyConnected;
+    isFullyConnected = checkIfFullyConnected(g);
+    if (!isFullyConnected) {
+        cout << "This graph is not fully connected!" << endl;
+        return;
+    }*/
+
     string order;
     Vertex* v = nullptr;
     int rootV = 0;
@@ -50,7 +58,9 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPa
 
     //voltar ao 0
     if (index == n - 1) {
-        double edgeW = g.findEdge(atual, root)->getDistance();
+        auto edge = g.findEdge(atual, root);
+        if (edge == nullptr) return 0;
+        double edgeW = edge->getDistance();
         if ((curentWeight + edgeW) < minWeight) {
             minWeight = curentWeight + edgeW;
             foundASolutionAlready = false;
@@ -75,7 +85,10 @@ double tspBT(Graph& g, unsigned int n, unsigned int path[], unsigned int finalPa
         }
 
         //bounding
-        double edgeW = g.findEdge(atual, i)->getDistance();
+        auto edge = g.findEdge(atual, i);
+        if (edge == nullptr) continue;
+
+        double edgeW = edge->getDistance();
 
         if (abs((curentWeight + edgeW) - minWeight) < 0.0000001 || (curentWeight + edgeW) < minWeight) {
             unsigned int updatedPath[n];

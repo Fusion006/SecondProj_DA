@@ -35,16 +35,17 @@ public:
     [[nodiscard]] double getLat() const;
     [[nodiscard]] double getLon() const;
     [[nodiscard]] Edge* getPath() const;
+    [[nodiscard]] int getNum() const;
+    [[nodiscard]] int getLow() const;
+    [[nodiscard]] bool isProcessing() const;
 
-
+    void setProcessing(bool p);
     void setVisited(bool state);
     void setPath(Edge* newPath);
     void setLat(double newLat);
     void setLon(double newLon);
     void setLow(int low);
     void setNum(int num);
-    int getNum() const;
-    int getLow() const;
     Edge* addEdge(Vertex *dest, double distance);
     Edge* addCopyEdge(Edge* copiedEdge);
     void eraseCopyEdges();
@@ -54,6 +55,7 @@ private:
     string name;
     double lat;
     double lon;
+    bool processing;       // auxiliary field
     int num;               // auxiliary field
     int low;               // auxiliary field
     unordered_map<int,Edge*> adj;
@@ -231,20 +233,27 @@ inline void Vertex::setLon(double newLon) {
     this->lat=newLon;
 }
 
-void Vertex::setNum(int num) {
+inline void Vertex::setNum(int num) {
     this->num = num;
 }
 
-void Vertex::setLow(int low) {
+inline void Vertex::setLow(int low) {
     this->low = low;
 }
 
-int Vertex::getNum() const {
+inline int Vertex::getNum() const {
     return num;
 }
 
-int Vertex::getLow() const {
+inline int Vertex::getLow() const {
     return low;
+}
+
+inline void Vertex::setProcessing(bool p) {
+    this->processing = p;
+}
+inline bool Vertex::isProcessing() const {
+    return processing;
 }
 
 /********************** Edge  ****************************/

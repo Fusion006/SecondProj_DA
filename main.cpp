@@ -9,9 +9,9 @@
 using namespace std;
 /**
  * Creates a copy for a graph.
- * gCopy turns into a copy of gOrigin.
+ * gCopy turns into a copy of @gOrigin.
  * @param gOrigin graph that is about about to be copied.
- * @param gCopy graph containing a copy of the graph gOrigin.
+ * @param gCopy graph containing a copy of the graph @gOrigin.
  */
 void graphCopy(Graph& gOrigin, Graph& gCopy) {
 

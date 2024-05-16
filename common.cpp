@@ -29,47 +29,51 @@ void printPath(const vector<int>& resVec, const double& res, const int& rootV, c
     cout << "Execution time: " << duration.count() << " seconds." << endl;
 }
 
-void dfs_scc(Graph& g, Vertex* v, stack<int>& s, list<list<int>> &l, int &i){
+void dfs_scc(Graph&g, Vertex *v, stack<int> &s, list<list<int>> &l, int &i) {
     v->setVisited(true);
-
     v->setLow(i);
     v->setNum(i);
+    v->setProcessing(true);
     s.push(v->getId());
     i++;
-
     for (auto & e : v->getAdj()) {
         auto w = e.second->getDest();
         if (!w->isVisited()) {
             dfs_scc(g, w, s, l, i);
             v->setLow(min(v->getLow(), w->getLow()));
-        } else if (w->isVisited())
+        } else if (w->isProcessing())
             v->setLow(min(v->getLow(), w->getNum()));
     }
-
     if (v->getNum() == v->getLow()) {
-        Vertex *w;
+        Vertex* w;
         list<int> scc;
         do {
             w = g.findVertex(s.top());
+            w->setProcessing(false);
             scc.push_front(w->getId());
             s.pop();
         } while (w != v);
-
-        l.push_back(scc);
+        l.push_front(scc);
     }
 }
 
 list<list<int>> sccTarjan(Graph& g) {
-    list<list<int>> res;
-    stack<int> s;
     int index = 1;
-    for (auto v : g.getVertexSet())
-        v.second->setVisited(false);
-
-    for (auto v : g.getVertexSet()) {
-        if (! v.second->isVisited())
-            dfs_scc(g, v.second, s, res, index);
+    stack<int> s;
+    list<list<int>> res;
+    for(auto j : g.getVertexSet()){
+        j.second->setVisited(false);
     }
-
+    for(auto i : g.getVertexSet()){
+        if(!i.second->isVisited()){
+            dfs_scc(g, i.second,s, res, index);
+        }
+    }
     return res;
+}
+
+bool checkIfFullyConnected(Graph& g) {
+    auto l = sccTarjan(g);
+    if (l.size() > 1) return false;
+    return true;
 }
