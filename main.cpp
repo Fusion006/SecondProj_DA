@@ -7,7 +7,12 @@
 #include "heuristic/Triangular.h"
 
 using namespace std;
-
+/**
+ * Creates a copy for a graph.
+ * gCopy turns into a copy of gOrigin.
+ * @param gOrigin graph that is about about to be copied.
+ * @param gCopy graph containing a copy of the graph gOrigin.
+ */
 void graphCopy(Graph& gOrigin, Graph& gCopy) {
 
     for (pair<const int, Vertex *> pair : gOrigin.getVertexSet()) {
@@ -20,7 +25,12 @@ void graphCopy(Graph& gOrigin, Graph& gCopy) {
         }
     }
 }
-
+/**
+ * Function that converts a data file into a graph with weighted edges.
+ * Creates a simple graph, so this function is only to be used for Toy Graphs.
+ * @param filepath path of the file that contains all the information about the edges.
+ * @return the Toy graph according to choices of the user.
+ */
 Graph buildSimpleGraph(const string& filepath){
     Graph g;
     ifstream ifile(filepath);
@@ -58,6 +68,14 @@ Graph buildSimpleGraph(const string& filepath){
     return g;
 }
 
+/**
+ * Function that converts a data file into a graph with weighted edges.
+ * Creates a complex graph, so not only are the edges weighted, but the vertexs also have coordinates.
+ * @param dirpath path of the directory that contains the file with all the information about the edges.
+ * @param filename name of the file with the information about all the edges.
+ * @param numOfNodes number of nodes that will be processed and used to create the graph.
+ * @return the Medium/Real-Life graph according to choices of the user.
+ */
 Graph buildComplexGraph(const string& dirpath, const string& filename, const int& numOfNodes)
 {
     Graph g;
@@ -114,6 +132,11 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
     return g;
 }
 
+/**
+ * Function that completes any graph.
+ * Turns a graph into a fully connected graph.
+ * @param g graph that will receive the new nodes.
+ */
 void completeComplexGraph(Graph& g)
 {
     unordered_map<int,Vertex*> vertexSet = g.getVertexSet();
@@ -134,6 +157,11 @@ void completeComplexGraph(Graph& g)
     }
 }
 
+/** Function that takes care of the User Interface to chose the algorithm he desires.
+ *  This function receives the user's orders and answers them according to the user's wish.
+ * @param g graph to give as an argument to the functions that actually respond to the user tasks.
+ * @param gCompleted fully connected copy of the graph g to use if needed.
+ */
 void Run(Graph& g){
     string order;
     while(true){
@@ -168,6 +196,13 @@ void Run(Graph& g){
         else cout << "Insert a valid number!" << endl;
     }
 }
+
+/** Function that takes care of the User Interface to choose the graph he desires.
+ *  This function receives the user's orders and answers them according to the user's wish.7
+ *  @param graph_type type of graph dataset chosen by the user.
+ * @param g graph that is about to be chosen by the user.
+ * @param gCompleted fully connected copy of the graph g to use if needed.
+ */
 void Graph_Menu(const string &graph_type, Graph& g){
     string option;
     while(option.empty()){
