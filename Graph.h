@@ -35,12 +35,17 @@ public:
     [[nodiscard]] double getLat() const;
     [[nodiscard]] double getLon() const;
     [[nodiscard]] Edge* getPath() const;
+    [[nodiscard]] int getNum() const;
+    [[nodiscard]] int getLow() const;
+    [[nodiscard]] bool isProcessing() const;
 
-
+    void setProcessing(bool p);
     void setVisited(bool state);
     void setPath(Edge* newPath);
     void setLat(double newLat);
     void setLon(double newLon);
+    void setLow(int low);
+    void setNum(int num);
     Edge* addEdge(Vertex *dest, double distance);
     Edge* addCopyEdge(Edge* copiedEdge);
     void eraseCopyEdges();
@@ -50,6 +55,9 @@ private:
     string name;
     double lat;
     double lon;
+    bool processing;       // auxiliary field
+    int num;               // auxiliary field
+    int low;               // auxiliary field
     unordered_map<int,Edge*> adj;
     Edge* path = nullptr;
 
@@ -223,6 +231,29 @@ inline void Vertex::setLat(double newLat)
 
 inline void Vertex::setLon(double newLon) {
     this->lat=newLon;
+}
+
+inline void Vertex::setNum(int num) {
+    this->num = num;
+}
+
+inline void Vertex::setLow(int low) {
+    this->low = low;
+}
+
+inline int Vertex::getNum() const {
+    return num;
+}
+
+inline int Vertex::getLow() const {
+    return low;
+}
+
+inline void Vertex::setProcessing(bool p) {
+    this->processing = p;
+}
+inline bool Vertex::isProcessing() const {
+    return processing;
 }
 
 /********************** Edge  ****************************/
