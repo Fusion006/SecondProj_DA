@@ -4,10 +4,13 @@
 #include "Graph.h"
 #include <iostream>
 #include <chrono>
+#include <stack>
+#include <list>
 
 using namespace std;
 
 Vertex* getNodeInput(Graph& g, string& order, int& rootV);
 void printPath(const vector<int>& resVec, const double& res, const int& rootV, chrono::duration<double> duration);
+
 
 #endif //SECOND_PROJ_DA_COMMON_H
