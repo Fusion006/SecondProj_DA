@@ -39,22 +39,17 @@ vector<int> christofides(Graph& g)
         if (numEdgesInTree % 2 != 0)
             oddWeightedVertexes.insert(vertex.second);
     }
-    cout<<"Created oddWeightedVertexes\n";
 
     makeGraphPerfect(oddWeightedVertexes, g);
-    cout<<"Made Graph perfect\n";
 
 
     vector<int> eulerPath = {0};
     Vertex* origin = g.findVertex(0);
     buildEulerTour(origin,eulerPath);
-    cout<<"Made Euler Path\n";
 
     vector<int> res = buildTSPtour(eulerPath);
-    cout<<"Built TSP\n";
 
     g.eraseCopyEdges();
-    cout<<"Cleaned up\n";
 
     return res;
 }

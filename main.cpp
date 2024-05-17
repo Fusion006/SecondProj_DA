@@ -86,8 +86,7 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
     if (edgesFile.is_open())
     {
         getline(edgesFile,line);
-        for (int i = 0; i < numOfNodes; i++) {
-            getline(edgesFile, line);
+        while (getline(edgesFile,line)) {
             istringstream stringline(line);
             string pointA; getline(stringline,pointA,',');
             string pointB; getline(stringline,pointB,',');
@@ -96,6 +95,11 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
             g.addVertex(stoi(pointA),pointA);
             g.addVertex(stoi(pointB),pointB);
             if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
+            {
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
+            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
             {
                 cout << "Error in reading complex Graph couldn't add edge";
                 exit(EXIT_FAILURE);
@@ -144,7 +148,7 @@ void completeComplexGraph(Graph& g)
     unordered_map<int,Vertex*> vertexSet = g.getVertexSet();
     for (pair<int,Vertex*> firstPair : vertexSet)
     {
-        if(firstPair.second->getAdj().size()-1 == g.getNumVertex()) continue;
+        if(firstPair.second->getAdj().size() == g.getNumVertex() -1) continue;
         for(pair<int,Vertex*> secondPair : vertexSet)
         {
             if (firstPair.first != secondPair.first)
@@ -182,20 +186,13 @@ void Run(Graph& g){
             cout << "CLosing now..." << endl;
             return;
         }
+        else if(order == "1") {printBacktrackingSolution(g);}
 
-<<<<<<< HEAD
-        else if(order == "1"){
-            printBacktrackingSolution(g);
-
-        }
-=======
-        else if(order == "1") printBacktrackingSolution(g);
->>>>>>> fe3c5b33369eaacbc312ec54faaad09182eb4594
-
-        else if(order == "2") printTriangularTSPAproximation(g);
+        else if(order == "2") {printTriangularTSPAproximation(g);}
 
         else if(order == "3"){
             buildMST(g);
+            christofides(g);
 
         }
 
