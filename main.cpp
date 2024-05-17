@@ -7,11 +7,13 @@
 #include "heuristic/Triangular.h"
 
 using namespace std;
+
 /**
- * Creates a copy for a graph.
- * gCopy turns into a copy of @gOrigin.
- * @param gOrigin graph that is about about to be copied.
- * @param gCopy graph containing a copy of the graph @gOrigin.
+ * @brief Creates a copy of graph @param gOrigin.
+ * Complexity: O(V + E).
+ * @param gCopy turns into a copy of @param gOrigin.
+ * @param gOrigin graph that is copied.
+ * @param gCopy graph containing a copy of the graph @param gOrigin.
  */
 void graphCopy(Graph& gOrigin, Graph& gCopy) {
 
@@ -26,10 +28,11 @@ void graphCopy(Graph& gOrigin, Graph& gCopy) {
     }
 }
 /**
- * Function that converts a data file into a graph with weighted edges.
- * Creates a simple graph, so this function is only to be used for Toy Graphs.
- * @param filepath path of the file that contains all the information about the edges.
- * @return the Toy graph according to choices of the user.
+ * @brief Function that converts a "Toy" graph data file into a graph with weighted edges.
+ * This function is only to be used for Toy Graphs.
+ * Complexity: O(n).
+ * @param filepath path of the file that contains all the information about the edges and nodes.
+ * @return the graph with the information of @param filepath.
  */
 Graph buildSimpleGraph(const string& filepath){
     Graph g;
@@ -49,7 +52,6 @@ Graph buildSimpleGraph(const string& filepath){
             g.addVertex(stoi(pointB),pointB);
 
             double dist = stod(distance);
-            //int dista = static_cast<int>(round(dist * 10));
             if (!g.addEdge(stoi(pointA), stoi(pointB), dist))
             {
                 cout << "Error in reading simple Graph couldn't add edge";
@@ -69,54 +71,30 @@ Graph buildSimpleGraph(const string& filepath){
 }
 
 /**
- * Function that converts a data file into a graph with weighted edges.
- * Creates a complex graph, so not only are the edges weighted, but the vertexs also have coordinates.
- * @param dirpath path of the directory that contains the file with all the information about the edges.
+ * @brief Function that converts a "Medium" or a "Real-World" graph data file into a graph with weighted edges.
+ * Complexity: O(V^2).
+ * @param dirpath path of the directory that contains the files with all the information about the edges and nodes.
  * @param filename name of the file with the information about all the edges.
  * @param numOfNodes number of nodes that will be processed and used to create the graph.
- * @return the Medium/Real-Life graph according to choices of the user.
+ * @return the graph with the information in @param dirpath.
  */
 Graph buildComplexGraph(const string& dirpath, const string& filename, const int& numOfNodes)
 {
     Graph g;
-    ifstream edgesFile(dirpath+filename);
     string line;
-    if (edgesFile.is_open())
-    {
-        getline(edgesFile,line);
-        for (int i = 0; i < numOfNodes; i++) {
-            getline(edgesFile, line);
-            istringstream stringline(line);
-            string pointA; getline(stringline,pointA,',');
-            string pointB; getline(stringline,pointB,',');
-            string distance; getline(stringline,distance,',');
-
-            g.addVertex(stoi(pointA),pointA);
-            g.addVertex(stoi(pointB),pointB);
-            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
-            {
-                cout << "Error in reading complex Graph couldn't add edge";
-                exit(EXIT_FAILURE);
-            }
-        }
-    }else{
-        cout << "Error in reading complex Graph file not found";
-        exit(EXIT_FAILURE);
-    }
-
-
 
     ifstream nodesFile(dirpath+"nodes.csv");
     if (nodesFile.is_open())
     {
         getline(nodesFile,line);
-        while (getline(nodesFile,line))
-        {
+        for (int i = 0; i < numOfNodes; i++) {
+            getline(nodesFile,line);
             istringstream stringline(line);
             string point; getline(stringline,point,',');
-            string lat; getline(stringline,lat,',');
             string lon; getline(stringline,lon,',');
+            string lat; getline(stringline,lat,',');
 
+            g.addVertex(stoi(point),point);
             Vertex* vertex = g.findVertex(stoi(point));
             if (vertex != nullptr)
             {
@@ -129,13 +107,40 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
         cout << "Error in reading complex Graph file not found";
         exit(EXIT_FAILURE);
     }
+
+    ifstream edgesFile(dirpath+filename);
+    if (edgesFile.is_open())
+    {
+        while (getline(edgesFile,line)) {
+            istringstream stringline(line);
+            string pointA; getline(stringline,pointA,',');
+            string pointB; getline(stringline,pointB,',');
+            string distance; getline(stringline,distance,',');
+
+            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
+            {
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
+            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
+            {
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
+        }
+    }else{
+        cout << "Error in reading complex Graph file not found";
+        exit(EXIT_FAILURE);
+    }
+
     return g;
 }
 
 /**
- * Function that completes any graph.
- * Turns a graph into a fully connected graph.
- * @param g graph that will receive the new nodes.
+ * @brief Function that completes graph @param g.
+ * Turns graph @param g into a fully connected graph.
+ * Complexity: O(V^2).
+ * @param g graph that will receive the new edges.
  */
 void completeComplexGraph(Graph& g)
 {
@@ -157,10 +162,9 @@ void completeComplexGraph(Graph& g)
     }
 }
 
-/** Function that takes care of the User Interface to chose the algorithm he desires.
- *  This function receives the user's orders and answers them according to the user's wish.
+/** @brief Function that takes care of the User Interface to chose the algorithm he desires.
+ * This function receives the user's orders and answers them according to the user's wish.
  * @param g graph to give as an argument to the functions that actually respond to the user tasks.
- * @param gCompleted fully connected copy of the graph g to use if needed.
  */
 void Run(Graph& g){
     string order;
@@ -197,11 +201,10 @@ void Run(Graph& g){
     }
 }
 
-/** Function that takes care of the User Interface to choose the graph he desires.
- *  This function receives the user's orders and answers them according to the user's wish.7
+/** @brief Function that takes care of the User Graph Interface to choose the graph he desires.
+ *  This function receives the user's orders and answers them according to the user's wish.
  *  @param graph_type type of graph dataset chosen by the user.
- * @param g graph that is about to be chosen by the user.
- * @param gCompleted fully connected copy of the graph g to use if needed.
+ * @param g graph to receive the information.
  */
 void Graph_Menu(const string &graph_type, Graph& g){
     string option;
@@ -239,7 +242,7 @@ void Graph_Menu(const string &graph_type, Graph& g){
             string file = "edges_" + option + ".csv";
             int n = stoi(option);
             g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
-            completeComplexGraph(g);
+            //completeComplexGraph(g);
         }
 
         else if(graph_type == "Real"){
