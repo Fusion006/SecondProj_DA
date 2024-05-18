@@ -230,7 +230,7 @@ inline void Vertex::setLat(double newLat)
 }
 
 inline void Vertex::setLon(double newLon) {
-    this->lat=newLon;
+    this->lon=newLon;
 }
 
 inline void Vertex::setNum(int num) {

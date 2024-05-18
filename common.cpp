@@ -19,7 +19,7 @@ Vertex* getNodeInput(Graph& g, string& order, int& rootV) {
 }
 
 void printPath(const vector<int>& resVec, const double& res, const int& rootV, chrono::duration<double> duration) {
-    cout << "There is a path with cost " << res << " for this graph:" << endl;
+    cout << "There is a path with a cost approximately of " << res << " for this graph:" << endl;
 
     for (auto node : resVec) {
         cout << " " << node << " ==>";

@@ -17,4 +17,6 @@ add_executable(Second_Proj_DA main.cpp
         heuristic/Triangular.h
         heuristic/Triangular.cpp
         common.h
-        common.cpp)
+        common.cpp
+        heuristic/TwoOpt.h
+        heuristic/TwoOpt.cpp)
