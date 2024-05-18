@@ -5,6 +5,7 @@
 #include "haversine.h"
 #include "heuristic/antColOpt.h"
 #include "heuristic/Triangular.h"
+#include "heuristic/TwoOpt.h"
 
 using namespace std;
 
@@ -71,14 +72,14 @@ Graph buildSimpleGraph(const string& filepath){
 }
 
 /**
- * @brief Function that converts a "Medium" or a "Real-World" graph data file into a graph with weighted edges.
+ * @brief Function that converts a "Medium" graph data file into a graph with weighted edges.
  * Complexity: O(V^2).
  * @param dirpath path of the directory that contains the files with all the information about the edges and nodes.
  * @param filename name of the file with the information about all the edges.
  * @param numOfNodes number of nodes that will be processed and used to create the graph.
  * @return the graph with the information in @param dirpath.
  */
-Graph buildComplexGraph(const string& dirpath, const string& filename, const int& numOfNodes)
+Graph buildMediumGraph(const string& dirpath, const string& filename, const int& numOfNodes)
 {
     Graph g;
     string line;
@@ -136,13 +137,70 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
     return g;
 }
 
+Graph buildRealWorldGraph(const string& filepath) {
+    Graph g;
+    string line;
+
+    ifstream nodesFile(filepath + "nodes.csv");
+    if (nodesFile.is_open())
+    {
+        getline(nodesFile,line);
+        while (getline(nodesFile,line)) {
+            istringstream stringline(line);
+            string point; getline(stringline,point,',');
+            string lon; getline(stringline,lon,',');
+            string lat; getline(stringline,lat,',');
+
+            g.addVertex(stoi(point),point);
+            Vertex* vertex = g.findVertex(stoi(point));
+            if (vertex != nullptr)
+            {
+                vertex->setLat(stod(lat));
+                vertex->setLon(stod(lon));
+            }
+
+        }
+    }else{
+        cout << "Error in reading complex Graph file not found";
+        exit(EXIT_FAILURE);
+    }
+
+    ifstream edgesFile(filepath + "edges.csv");
+    if (edgesFile.is_open())
+    {
+        getline(edgesFile,line);
+        while (getline(edgesFile,line)) {
+            istringstream stringline(line);
+            string pointA; getline(stringline,pointA,',');
+            string pointB; getline(stringline,pointB,',');
+            string distance; getline(stringline,distance,',');
+
+            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
+            {
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
+            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
+            {
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
+        }
+    }else{
+        cout << "Error in reading complex Graph file not found";
+        exit(EXIT_FAILURE);
+    }
+
+    return g;
+}
+
 /**
  * @brief Function that completes graph @param g.
  * Turns graph @param g into a fully connected graph.
  * Complexity: O(V^2).
  * @param g graph that will receive the new edges.
  */
-void completeComplexGraph(Graph& g)
+void completeGraph(Graph& g)
 {
     unordered_map<int,Vertex*> vertexSet = g.getVertexSet();
     for (pair<int,Vertex*> firstPair : vertexSet)
@@ -166,8 +224,13 @@ void completeComplexGraph(Graph& g)
  * This function receives the user's orders and answers them according to the user's wish.
  * @param g graph to give as an argument to the functions that actually respond to the user tasks.
  */
-void Run(Graph& g){
+void Run(Graph& g, bool isRealWorld){
     string order;
+    Graph gComplete;
+    graphCopy(g, gComplete);
+    if (isRealWorld) {
+        completeGraph(gComplete);
+    }
     while(true){
         cout << endl << "What do you wish to do?" << endl << endl <<
              "Please insert:" << endl <<
@@ -187,15 +250,13 @@ void Run(Graph& g){
 
         else if(order == "1") printBacktrackingSolution(g);
 
-        else if(order == "2") printTriangularTSPAproximation(g);
+        else if(order == "2") printTriangularTSPAproximation(gComplete);
 
         else if(order == "3"){
 
         }
 
-        else if(order == "4"){
-
-        }
+        else if(order == "4") printTwoOptApproximation(g);
 
         else cout << "Insert a valid number!" << endl;
     }
@@ -241,25 +302,40 @@ void Graph_Menu(const string &graph_type, Graph& g){
 
             string file = "edges_" + option + ".csv";
             int n = stoi(option);
-            g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
-            //completeComplexGraph(g);
+            g = buildMediumGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/", file, n);
         }
 
         else if(graph_type == "Real"){
-            option = "";
-            //TODO
+            cout << "Choose the Real World Graph to use[1/2/3]:" << endl;
+            getline(cin >> ws, option);
+
+            if(option == "1") g = buildRealWorldGraph("../datasets/Real-world-Graphs/graph1/");
+
+            else if(option == "2") g = buildSimpleGraph("../datasets/Real-world-Graphs/graph2/");
+
+            else if(option == "3") g = buildSimpleGraph("../datasets/Real-world-Graphs/graph3/");
+
+            else {
+                cout << "Insert a valid graph!" << endl;
+                option = "";
+                continue;
+            }
+
         }
     }
 }
 
 int main() {
     Graph g;
+    bool isRW = false;
     string graph_type;
     std::cout << "Welcome!" << std::endl;
     while(graph_type.empty()){
         cout << "Which dataset do you want to use[Toy/Medium/Real]:" << endl;
 
         getline(cin >> ws, graph_type);
+
+        if (graph_type == "Real") isRW = true;
 
         if (graph_type != "Toy" && graph_type != "Medium" && graph_type != "Real") {
             cout << "Insert a valid dataset!" << endl;
@@ -268,7 +344,7 @@ int main() {
     }
 
     Graph_Menu(graph_type, g);
-    Run(g);
+    Run(g, isRW);
 
     return 0;
 }

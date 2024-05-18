@@ -40,7 +40,7 @@ void dfsVisitMST(Graph& g, Vertex *v, vector<int> & res);
  * @return vector of integer values, witch represent the nodes, and ordered by the order of the found path.
  */
 vector<int> triangularAproxiamtion(Graph& g, const int& root, double& res);
-/** @brief Function that calls the Triangular approximation algorithm using graph @param g and prints the path found path for the TSP problem, as well as the cost, in seconds, to find the path.
+/** @brief Function that calls the Triangular approximation algorithm using graph @param g and prints the found path for the TSP problem, as well as the cost, in seconds, to find the path.
  * Complexity: O(n + V + E).
  * @param g graph selected by the user.
  */

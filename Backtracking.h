@@ -20,7 +20,7 @@ using namespace std;
 
 
 /**
- * @brief Function that calls the Backtracking algorithm using graph @param g and prints the path found path for the TSP problem, as well as the cost, in seconds, to find the path.
+ * @brief Function that calls the Backtracking algorithm using graph @param g and prints the found path for the TSP problem, as well as the cost, in seconds, to find the path.
  * Complexity: O(n + 2^n).
  * @param g graph selected by the user.
  */
