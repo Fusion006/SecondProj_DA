@@ -2,12 +2,14 @@
 #define SECOND_PROJ_DA_CHRISTOFIDES_H
 
 #include "../Graph.h"
+#include "../common.h"
+#include "../haversine.h"
 #include <algorithm>
 #include <cfloat>
 
-void buildMST(Graph& g);
-vector<int> christofides(Graph& g);
+Graph buildMST(Graph& g);
+pair<vector<int>,double> christofides(Graph& g);
 void buildEulerTour(Vertex* origin, vector<int>& path);
-vector<int> buildTSPtour(vector<int> eulerPath);
+vector<int> buildTSPtour(const vector<int>& eulerPath);
 
 #endif

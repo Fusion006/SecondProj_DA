@@ -4,8 +4,9 @@
 
 Edge* getMSTEdge(const vector<Vertex*>& tree);
 void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g);
-void buildMST(Graph& g)
+Graph buildMST(Graph& g)
 {
+    Graph res;
     g.cleanGraph();
     vector<Vertex*> tree;
     Vertex* origin = g.findVertex(0);
@@ -20,10 +21,35 @@ void buildMST(Graph& g)
         newEdge->setSelected(true);
         reverseEdge->setSelected(true);
         tree.push_back(newEdge->getDest());
+        Vertex *original = newEdge->getOrig();
+        Vertex *dest = newEdge->getDest();
+        res.addVertex(original->getId(),original->getName(),original->getLat(),original->getLon());
+        res.addVertex(dest->getId(),dest->getName(),dest->getLat(),dest->getLon());
+        res.addEdge(original->getId(),dest->getId(),newEdge->getDistance());
+        res.addEdge(dest->getId(),original->getId(),newEdge->getDistance());
     }
+    return res;
 }
 
-vector<int> christofides(Graph& g)
+Edge* getMSTEdge(const vector<Vertex*>& tree)
+{
+    Edge* res = nullptr;
+    auto minDist = DBL_MAX;
+    for (Vertex* vertex : tree)
+    {
+        for (pair<int,Edge*> edge : vertex->getAdj())
+        {
+            if (!edge.second->getDest()->isVisited() && edge.second->getDistance() < minDist)
+            {
+                res = edge.second;
+                minDist = edge.second->getDistance();
+            }
+        }
+    }
+    return res;
+}
+
+pair<vector<int>,double> christofides(Graph& g)
 {
     set<Vertex*> oddWeightedVertexes;
     for (pair<int,Vertex*> vertex : g.getVertexSet())
@@ -39,7 +65,7 @@ vector<int> christofides(Graph& g)
         if (numEdgesInTree % 2 != 0)
             oddWeightedVertexes.insert(vertex.second);
     }
-
+    cout<<"making perfect\n";
     makeGraphPerfect(oddWeightedVertexes, g);
 
 
@@ -50,8 +76,14 @@ vector<int> christofides(Graph& g)
     vector<int> res = buildTSPtour(eulerPath);
 
     g.eraseCopyEdges();
+    double dist = 0;
+    size_t last = res.size()-1;
+    for (int i = 0; i < last; i++){
+        dist += g.findEdge(eulerPath[i],eulerPath[i+1])->getDistance();
+    }
 
-    return res;
+
+    return {res,dist};
 }
 
 void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g)
@@ -60,8 +92,18 @@ void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g)
     {
         Edge* shortestEdge = nullptr;
         auto shortestDistance = DBL_MAX;
+        Edge* edge;
+        double distance;
         for (Vertex* origin : oddWeightedVertexes)
         {
+            for (Vertex* neighbor : oddWeightedVertexes){
+                edge = g.findEdge(neighbor->getId(),origin->getId());
+                if ((edge == nullptr ) && (neighbor->getId() != origin->getId())){
+                    distance = haversine(origin->getLat(),origin->getLon(),neighbor->getLat(),neighbor->getLon());
+                    neighbor->addEdge(origin,distance);
+                    origin->addEdge(neighbor,distance);
+                }
+            }
             for (Vertex* dest : oddWeightedVertexes)
             {
                 if (dest == origin) continue;
@@ -84,33 +126,14 @@ void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g)
         oddWeightedVertexes.erase(dest);
         //oddWeightedVertexes.erase( (oddWeightedVertexes.begin(),oddWeightedVertexes.end(),origin),oddWeightedVertexes.end());
         //oddWeightedVertexes.erase(remove(oddWeightedVertexes.begin(),oddWeightedVertexes.end(),dest),oddWeightedVertexes.end());
-        cout<<oddWeightedVertexes.size()<<endl;
     }
-}
-
-Edge* getMSTEdge(const vector<Vertex*>& tree)
-{
-    Edge* res = nullptr;
-    auto minDist = DBL_MAX;
-    for (Vertex* vertex : tree)
-    {
-        for (pair<int,Edge*> edge : vertex->getAdj())
-        {
-            if (!edge.second->getDest()->isVisited() && edge.second->getDistance() < minDist)
-            {
-                res = edge.second;
-                minDist = edge.second->getDistance();
-            }
-        }
-    }
-    return res;
 }
 
 void buildEulerTour(Vertex* origin, vector<int>& path) {
     for (pair<int,Edge*> edgePair : origin->getAdj())
     {
         Edge* edge = edgePair.second;
-        if (edge->getSelected() && !edge->isUsed())
+        if (!edge->isUsed())
         {
             edge->setUsed(true);
             edge->getReverse()->setUsed(true);
@@ -120,7 +143,7 @@ void buildEulerTour(Vertex* origin, vector<int>& path) {
     }
 }
 
-vector<int> buildTSPtour(vector<int> eulerPath) {
+vector<int> buildTSPtour(const vector<int>& eulerPath) {
     vector<int> res;
     set<int> visited;
     for (int vertex : eulerPath)

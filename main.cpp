@@ -92,18 +92,20 @@ Graph buildComplexGraph(const string& dirpath, const string& filename, const int
             string pointB; getline(stringline,pointB,',');
             string distance; getline(stringline,distance,',');
 
-            g.addVertex(stoi(pointA),pointA);
-            g.addVertex(stoi(pointB),pointB);
-            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
-            {
-                cout << "Error in reading complex Graph couldn't add edge";
-                exit(EXIT_FAILURE);
+            int A_id = stoi(pointA); int B_id = stoi(pointB);
+            Vertex* A = g.findVertex(A_id);
+            Vertex* B = g.findVertex(B_id);
+            if (A == nullptr){
+                g.addVertex(A_id,pointA);
+                A = g.findVertex(A_id);
             }
-            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
-            {
-                cout << "Error in reading complex Graph couldn't add edge";
-                exit(EXIT_FAILURE);
+            if (B == nullptr){
+                g.addVertex(B_id,pointB);
+                B = g.findVertex(B_id);
             }
+
+            g.addEdge(stoi(pointA), stoi(pointB), stod(distance));
+            //g.addEdge(stoi(pointB), stoi(pointA), stod(distance));
         }
     }else{
         cout << "Error in reading complex Graph file not found";
@@ -191,8 +193,13 @@ void Run(Graph& g){
         else if(order == "2") {printTriangularTSPAproximation(g);}
 
         else if(order == "3"){
-            buildMST(g);
-            christofides(g);
+            auto start = chrono::high_resolution_clock::now();
+            Graph g2 = buildMST(g);
+            pair<vector<int>, double> path = christofides(g2);
+            auto end = chrono::high_resolution_clock::now();
+
+            chrono::duration<double> duration = end - start;
+            printPath(path.first,path.second,0,duration);
 
         }
 
@@ -245,8 +252,12 @@ void Graph_Menu(const string &graph_type, Graph& g){
 
             string file = "edges_" + option + ".csv";
             int n = stoi(option);
+            cout<<"building\n";
             g = buildComplexGraph("../datasets/Extra_Fully_Connected_Graphs/Extra_Fully_Connected_Graphs/",file, n);
+            cout<<"completing\n";
             completeComplexGraph(g);
+            cout<<"completed\n";
+
         }
 
         else if(graph_type == "Real"){
