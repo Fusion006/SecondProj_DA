@@ -227,8 +227,12 @@ void completeGraph(Graph& g)
  */
 void Run(Graph& g, bool isRealWorld){
     string order;
-    //Graph gComplete;
-    //graphCopy(g, gComplete); TODO perguntar o que é isto
+
+    Graph gComplete;
+    if (isRealWorld) {
+        graphCopy(g, gComplete);
+        completeGraph(gComplete);
+    }
     while(true){
         cout << endl << "What do you wish to do?" << endl << endl <<
              "Please insert:" << endl <<
@@ -255,6 +259,10 @@ void Run(Graph& g, bool isRealWorld){
             printTriangularTSPAproximation(g);
         }
 
+        else if(order == "2") {
+            if (isRealWorld) printTriangularTSPAproximation(gComplete);
+            else printTriangularTSPAproximation(g);
+        }
 
         else if(order == "3"){
             auto start = chrono::high_resolution_clock::now();
