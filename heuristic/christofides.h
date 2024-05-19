@@ -8,7 +8,7 @@
 #include <cfloat>
 
 Graph buildMST(Graph& g);
-pair<vector<int>,double> christofides(Graph& g);
+pair<vector<int>,double> christofides(Graph& g, Graph& fullGraph);
 void buildEulerTour(Vertex* origin, vector<int>& path);
 vector<int> buildTSPtour(const vector<int>& eulerPath);
 

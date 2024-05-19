@@ -11,7 +11,7 @@
 #include <iostream>
 #include <chrono>
 #include <stack>
-#include <list>
+#include <set>
 
 using namespace std;
 
@@ -48,12 +48,12 @@ bool checkIfFullyConnected(Graph& g);
  * @param l
  * @param i
  */
-void dfs_scc(Graph&g, Vertex *v, stack<int> &s, list<list<int>> &l, int &i);
+void dfs_scc(Graph&g, Vertex *v, stack<int> &s, vector<set<int>> &l, int &i);
 /**
  *
  * @param g
  * @return
  */
-list<list<int>> sccTarjan(Graph& g);
+vector<set<int>> sccTarjan(Graph& g);
 
 #endif //SECOND_PROJ_DA_COMMON_H

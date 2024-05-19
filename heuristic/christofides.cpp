@@ -2,31 +2,79 @@
 #include <iostream>
 #include "christofides.h"
 
-Edge* getMSTEdge(const vector<Vertex*>& tree);
-void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g);
+void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g, Graph& fullGraph);
 Graph buildMST(Graph& g)
 {
+    priority_queue<Edge> edgesQueue;
+    for (pair<int,Vertex*> vertex : g.getVertexSet())
+    {
+        for (pair<int,Edge*> neighbor : vertex.second->getAdj())
+        {
+            edgesQueue.push(*neighbor.second);
+        }
+    }
     Graph res;
     g.cleanGraph();
-    vector<Vertex*> tree;
-    Vertex* origin = g.findVertex(0);
-    origin->setVisited(true);
-    tree.push_back(origin);
-
-    while(tree.size() < g.getNumVertex())
+    int treeSize = 0;
+    int scc = 0;
+    int index = 0;
+    while(treeSize < g.getNumVertex() || scc != 1)
     {
-        Edge* newEdge = getMSTEdge(tree);
-        Edge* reverseEdge = g.findEdge(newEdge->getDest()->getId(),newEdge->getOrig()->getId());
-        newEdge->getDest()->setVisited(true);
-        newEdge->setSelected(true);
-        reverseEdge->setSelected(true);
-        tree.push_back(newEdge->getDest());
+        Edge shortestEdge = edgesQueue.top();
+        edgesQueue.pop();
+        if (shortestEdge.getDest()->isVisited() && shortestEdge.getOrig()->isVisited() && shortestEdge.getDest()->getNum() == shortestEdge.getOrig()->getNum())
+            continue;
+
+        Edge* newEdge = g.findEdge(shortestEdge.getOrig()->getId(),shortestEdge.getDest()->getId());
         Vertex *original = newEdge->getOrig();
         Vertex *dest = newEdge->getDest();
-        res.addVertex(original->getId(),original->getName(),original->getLat(),original->getLon());
-        res.addVertex(dest->getId(),dest->getName(),dest->getLat(),dest->getLon());
-        res.addEdge(original->getId(),dest->getId(),newEdge->getDistance());
-        res.addEdge(dest->getId(),original->getId(),newEdge->getDistance());
+
+
+        if (original->isVisited() && dest->isVisited()) {
+            scc--;
+            int originNum = original->getNum();
+            int destNum = dest->getNum();
+            for (auto pair1 : g.getVertexSet())
+            {
+                if (pair1.second->getNum() == originNum)
+                    pair1.second->setNum(destNum);
+            }
+
+        }else if(!original->isVisited() && !dest->isVisited()) {
+            original->setVisited(true);
+            original->setNum(index);
+            dest->setVisited(true);
+            dest->setNum(index);
+
+            treeSize += 2;
+            index++;
+            scc++;
+            res.addVertex(original->getId(), original->getName(), original->getLat(), original->getLon());
+            res.addVertex(dest->getId(), dest->getName(), dest->getLat(), dest->getLon());
+
+        }else {
+            if (!original->isVisited()) {
+                treeSize++;
+                original->setVisited(true);
+                original->setNum(dest->getNum());
+                res.addVertex(original->getId(), original->getName(), original->getLat(), original->getLon());
+            } else if (!dest->isVisited()) {
+                treeSize++;
+                dest->setVisited(true);
+                dest->setNum(original->getNum());
+                res.addVertex(dest->getId(), dest->getName(), dest->getLat(), dest->getLon());
+            }
+
+        }
+
+        if (!res.addEdge(original->getId(), dest->getId(), newEdge->getDistance())) {
+            cout<<"\nError in building MST\n";
+            exit(EXIT_FAILURE);
+        }
+        if (!res.addEdge(dest->getId(),original->getId(),newEdge->getDistance())) {
+            cout<<"\nError in building MST\n";
+            exit(EXIT_FAILURE);
+        }
     }
     return res;
 }
@@ -49,24 +97,16 @@ Edge* getMSTEdge(const vector<Vertex*>& tree)
     return res;
 }
 
-pair<vector<int>,double> christofides(Graph& g)
+pair<vector<int>,double> christofides(Graph& g, Graph& fullGraph)
 {
     set<Vertex*> oddWeightedVertexes;
     for (pair<int,Vertex*> vertex : g.getVertexSet())
     {
-        int numEdgesInTree = 0;
-        for (pair<int,Edge*> edge : vertex.second->getAdj())
-        {
-            if (!edge.second->getSelected())
-            {
-                numEdgesInTree++;
-            }
-        }
-        if (numEdgesInTree % 2 != 0)
+        if (vertex.second->getAdj().size() % 2 != 0)
             oddWeightedVertexes.insert(vertex.second);
     }
     cout<<"making perfect\n";
-    makeGraphPerfect(oddWeightedVertexes, g);
+    makeGraphPerfect(oddWeightedVertexes, g, fullGraph);
 
 
     vector<int> eulerPath = {0};
@@ -79,53 +119,68 @@ pair<vector<int>,double> christofides(Graph& g)
     double dist = 0;
     size_t last = res.size()-1;
     for (int i = 0; i < last; i++){
-        dist += g.findEdge(eulerPath[i],eulerPath[i+1])->getDistance();
-    }
+        Vertex* currPoint = g.findVertex(res[i]);
+        Vertex* nextPoint = g.findVertex(res[i+1]);
 
+        Edge* edge = fullGraph.findEdge(currPoint->getId(),nextPoint->getId());
+        if (edge == nullptr)
+            edge = fullGraph.findEdge(nextPoint->getId(),currPoint->getId());
+        dist += edge->getDistance();
+    }
+    Edge* returnEdge = fullGraph.findEdge(res[last],0);
+    if (returnEdge == nullptr){
+        returnEdge = fullGraph.findEdge(0,res[last]);
+    }
+    dist += returnEdge->getDistance();
 
     return {res,dist};
 }
 
-void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g)
-{
-    while (!oddWeightedVertexes.empty())
+void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g, Graph& fullGraph) {
+    priority_queue<Edge> edgesQueue;
+    for (Vertex* vertex1: oddWeightedVertexes)
     {
-        Edge* shortestEdge = nullptr;
-        auto shortestDistance = DBL_MAX;
-        Edge* edge;
-        double distance;
-        for (Vertex* origin : oddWeightedVertexes)
+        for (Vertex* vertex2: oddWeightedVertexes)
         {
-            for (Vertex* neighbor : oddWeightedVertexes){
-                edge = g.findEdge(neighbor->getId(),origin->getId());
-                if ((edge == nullptr ) && (neighbor->getId() != origin->getId())){
-                    distance = haversine(origin->getLat(),origin->getLon(),neighbor->getLat(),neighbor->getLon());
-                    neighbor->addEdge(origin,distance);
-                    origin->addEdge(neighbor,distance);
-                }
-            }
-            for (Vertex* dest : oddWeightedVertexes)
-            {
-                if (dest == origin) continue;
-                Edge* newEdge = g.findEdge(origin->getId(),dest->getId());
-                if (shortestDistance > newEdge->getDistance())
-                {
-                    shortestDistance = newEdge->getDistance();
-                    shortestEdge = newEdge;
-                }
-            }
+            if (vertex1->getId() == vertex2->getId()) continue;
+            Edge* edge = fullGraph.findEdge(vertex1->getId(),vertex2->getId());
+            if (edge == nullptr)
+                edge = fullGraph.findEdge(vertex2->getId(),vertex1->getId());
+            double distance = edge->getDistance();
+            Edge newEdge = Edge(vertex1,vertex2, distance);
+            Edge newEdge2 = Edge(vertex2,vertex1, distance);
+
+            edgesQueue.push(newEdge);
+            edgesQueue.push(newEdge2);
+
         }
-        Vertex* origin = shortestEdge->getOrig();
-        Vertex* dest = shortestEdge->getDest();
+    }
 
-        Edge* edgeCopy = origin->addCopyEdge(shortestEdge);
-        edgeCopy->setSelected(true);
-        edgeCopy->getReverse()->setSelected(true);
+    while (!oddWeightedVertexes.empty()) {
+        if (edgesQueue.empty()){
+            cout<<"empty";
+        }
+        Edge edge = edgesQueue.top();
+        edgesQueue.pop();
+        if (oddWeightedVertexes.find(edge.getOrig()) != oddWeightedVertexes.end() &&
+            oddWeightedVertexes.find(edge.getDest()) != oddWeightedVertexes.end()) {
 
-        oddWeightedVertexes.erase(origin);
-        oddWeightedVertexes.erase(dest);
-        //oddWeightedVertexes.erase( (oddWeightedVertexes.begin(),oddWeightedVertexes.end(),origin),oddWeightedVertexes.end());
-        //oddWeightedVertexes.erase(remove(oddWeightedVertexes.begin(),oddWeightedVertexes.end(),dest),oddWeightedVertexes.end());
+            Edge *shortestEdge = g.findEdge(edge.getOrig()->getId(), edge.getDest()->getId());
+            Vertex* shortestEdgeOrigin = edge.getOrig();
+            Vertex* shortestEdgeDest = edge.getDest();
+
+            if (shortestEdge == nullptr) {
+                //there are no edges that connect those 2 points
+                shortestEdgeOrigin->addEdge(shortestEdgeDest, edge.getDistance());
+                shortestEdgeDest->addEdge(shortestEdgeOrigin, edge.getDistance());
+            } else {
+                //there is already 1 edge that connects those 2 points soo we need a copyEdge
+                shortestEdgeOrigin->addCopyEdge(shortestEdge);
+            }
+
+            oddWeightedVertexes.erase(shortestEdgeOrigin);
+            oddWeightedVertexes.erase(shortestEdgeDest);
+        }
     }
 }
 

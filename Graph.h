@@ -81,7 +81,14 @@ public:
     [[nodiscard]] inline bool isUsed() const;
     [[nodiscard]] inline double getPheromones() const;
     [[nodiscard]] inline double getTransitionProbability() const;
+    inline bool operator<(Edge e2) const{
+        if (this->distance < e2.distance) return false;
+        if (this->distance > e2.distance) return true;
+        if (this->orig->getId() < e2.dest->getId()) return false;
+        return this->orig->getId() > e2.dest->getId();
 
+
+    }
 
     void setSelected(bool state);
     void setUsed(bool state);
@@ -166,8 +173,8 @@ inline Edge* Vertex::addCopyEdge(Edge* copiedEdge) {
     Edge* copyEdge = new Edge(copiedEdge->getOrig(), dest, copiedEdge->getDistance());
     Edge* reverseCopyEdge = new Edge(dest, copiedEdge->getOrig(), copiedEdge->getDistance());
 
-    adj[(dest->id + 1) * -1] = copyEdge;
-    dest->adj[(this->id + 1) * -1] = reverseCopyEdge;
+    adj[(dest->id + 1) * -1]        = copyEdge;
+    dest->adj[(this->id + 1) * -1]  = reverseCopyEdge;
 
     copyEdge->setReverse(reverseCopyEdge);
     reverseCopyEdge->setReverse(copyEdge);
@@ -324,6 +331,7 @@ void Graph::cleanGraph() {
         vertex.second->setVisited(false);
         vertex.second->setPath(nullptr);
         unordered_map<int,Edge*> edges = vertex.second->getAdj();
+        vertex.second->setNum(-1);
         for (pair<int,Edge*> edge : edges)
         {
             edge.second->setPheromones(1);

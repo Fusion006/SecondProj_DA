@@ -88,7 +88,6 @@ Graph buildMediumGraph(const string& dirpath, const string& filename, const int&
     ifstream edgesFile(dirpath+filename);
     if (edgesFile.is_open())
     {
-        getline(edgesFile,line);
         while (getline(edgesFile,line)) {
             istringstream stringline(line);
             string pointA; getline(stringline,pointA,',');
@@ -106,8 +105,7 @@ Graph buildMediumGraph(const string& dirpath, const string& filename, const int&
                 g.addVertex(B_id,pointB);
                 B = g.findVertex(B_id);
             }
-            A->addEdge(B,stod(distance))
-            g.addEdge(stoi(pointA), stoi(pointB), stod(distance));
+            A->addEdge(B,stod(distance));
         }
     }else{
         cout << "Error in reading complex Graph file not found";
@@ -118,14 +116,12 @@ Graph buildMediumGraph(const string& dirpath, const string& filename, const int&
     if (nodesFile.is_open())
     {
         getline(nodesFile,line);
-        for (int i = 0; i < numOfNodes; i++) {
-            getline(nodesFile,line);
+        while (getline(nodesFile,line)) {
             istringstream stringline(line);
             string point; getline(stringline,point,',');
             string lon; getline(stringline,lon,',');
             string lat; getline(stringline,lat,',');
 
-            g.addVertex(stoi(point),point);
             Vertex* vertex = g.findVertex(stoi(point));
             if (vertex != nullptr)
             {
@@ -231,11 +227,8 @@ void completeGraph(Graph& g)
  */
 void Run(Graph& g, bool isRealWorld){
     string order;
-    Graph gComplete;
-    graphCopy(g, gComplete);
-    if (isRealWorld) {
-        completeGraph(gComplete);
-    }
+    //Graph gComplete;
+    //graphCopy(g, gComplete); TODO perguntar o que é isto
     while(true){
         cout << endl << "What do you wish to do?" << endl << endl <<
              "Please insert:" << endl <<
@@ -249,23 +242,29 @@ void Run(Graph& g, bool isRealWorld){
         getline(cin >> ws, order);
 
         if(order == "close"){
-            cout << "CLosing now..." << endl;
+            cout << "Closing now..." << endl;
             return;
         }
-        else if(order == "1") {printBacktrackingSolution(g);}
+        else if(order == "1") {
+            completeGraph(g);
+            printBacktrackingSolution(g);
+        }
 
-        else if(order == "2") {printTriangularTSPAproximation(g);}
+        else if(order == "2") {
+            completeGraph(g);
+            printTriangularTSPAproximation(g);
+        }
 
 
         else if(order == "3"){
             auto start = chrono::high_resolution_clock::now();
+            cout << "Building MST\n";
             Graph g2 = buildMST(g);
-            pair<vector<int>, double> path = christofides(g2);
+            pair<vector<int>, double> path = christofides(g2, g);
             auto end = chrono::high_resolution_clock::now();
 
             chrono::duration<double> duration = end - start;
             printPath(path.first,path.second,0,duration);
-
         }
 
         else if(order == "4") printTwoOptApproximation(g);

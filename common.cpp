@@ -29,7 +29,7 @@ void printPath(const vector<int>& resVec, const double& res, const int& rootV, c
     cout << "Execution time: " << duration.count() << " seconds." << endl;
 }
 
-void dfs_scc(Graph&g, Vertex *v, stack<int> &s, list<list<int>> &l, int &i) {
+void dfs_scc(Graph&g, Vertex *v, stack<int> &s, vector<set<int>> &l, int &i) {
     v->setVisited(true);
     v->setLow(i);
     v->setNum(i);
@@ -46,21 +46,21 @@ void dfs_scc(Graph&g, Vertex *v, stack<int> &s, list<list<int>> &l, int &i) {
     }
     if (v->getNum() == v->getLow()) {
         Vertex* w;
-        list<int> scc;
+        set<int> scc;
         do {
             w = g.findVertex(s.top());
             w->setProcessing(false);
-            scc.push_front(w->getId());
+            scc.insert(w->getId());
             s.pop();
         } while (w != v);
-        l.push_front(scc);
+        l.push_back(scc);
     }
 }
 
-list<list<int>> sccTarjan(Graph& g) {
+vector<set<int>> sccTarjan(Graph& g) {
     int index = 1;
     stack<int> s;
-    list<list<int>> res;
+    vector<set<int>> res;
     for(auto j : g.getVertexSet()){
         j.second->setVisited(false);
     }
