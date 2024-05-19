@@ -227,8 +227,8 @@ void completeGraph(Graph& g)
 void Run(Graph& g, bool isRealWorld){
     string order;
     Graph gComplete;
-    graphCopy(g, gComplete);
     if (isRealWorld) {
+        graphCopy(g, gComplete);
         completeGraph(gComplete);
     }
     while(true){
@@ -250,7 +250,10 @@ void Run(Graph& g, bool isRealWorld){
 
         else if(order == "1") printBacktrackingSolution(g);
 
-        else if(order == "2") printTriangularTSPAproximation(gComplete);
+        else if(order == "2") {
+            if (isRealWorld) printTriangularTSPAproximation(gComplete);
+            else printTriangularTSPAproximation(g);
+        }
 
         else if(order == "3"){
 

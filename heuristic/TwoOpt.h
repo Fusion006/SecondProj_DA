@@ -21,7 +21,7 @@ vector<int> findGreedyTour(Graph& g, const int& start);
 /** @brief Applies the 2-opt algorithm to try to improve the given tour into a tour with less cost.
  * It iteratively swaps two edges in the current best tour.
  * The algorithm continues until no further improvement is possible.
- * Comlexity: O(V^4).
+ * Complexity: O(V^4).
  * @param g graph given by the user.
  * @param path vector of integers representing the current tour. It will be changed if a better path is found.
  * @return The cost of the best tour found.
