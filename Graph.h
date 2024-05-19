@@ -83,11 +83,7 @@ public:
     [[nodiscard]] inline double getTransitionProbability() const;
     inline bool operator<(Edge e2) const{
         if (this->distance < e2.distance) return false;
-        if (this->distance > e2.distance) return true;
-        if (this->orig->getId() < e2.dest->getId()) return false;
-        return this->orig->getId() > e2.dest->getId();
-
-
+        return this->distance > e2.distance;
     }
 
     void setSelected(bool state);

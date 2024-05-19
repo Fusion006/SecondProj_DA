@@ -2,6 +2,8 @@
 #include <iostream>
 #include "antColOpt.h"
 #include "../Graph.h"
+#include "../haversine.h"
+
 double getOutgoingDist(Vertex* vertex);
 double getTotalWeight(Vertex* vertex);
 
@@ -131,7 +133,7 @@ Ant getAntPath(Graph& g, double bestDistance){
 
 double updateTransitionProbability(Edge* edge, double averageDist, double totalWeight)
 {
-    double distanceWeight = 1 / edge->getDistance(); //TODO maybe dont use 1/dist
+    double distanceWeight = averageDist / edge->getDistance();
     double pheromonesWeight = edge->getPheromones();
     double newProb = distanceWeight * pheromonesWeight / totalWeight;
     edge->setTransitionProbability(newProb);
@@ -142,30 +144,41 @@ double updateTransitionProbability(Edge* edge, double averageDist, double totalW
 pair<double,vector<int>> runGreedy(Graph& g) {
     Ant ant;
     for (pair<int,Vertex*> vertex : g.getVertexSet())
-    {
-        vertex.second->setVisited(false);
-    }
+    g.cleanGraph();
     ant.current = g.findVertex(0);
     ant.current->setVisited(true);
     ant.visited.push_back(0);
 
     while (ant.visited.size() < g.getNumVertex())
     {
-        Edge* edge = nullptr;
-        for (auto p : ant.current->getAdj())
-        {
-            if (edge == nullptr || (p.second->getDistance() < edge->getDistance() && !p.second->getDest()->isVisited()))
+        double  minDist = DBL_MAX;
+        Vertex* next;
+        for (auto p : g.getVertexSet()){
+            if (p.second != ant.current && g.findEdge(ant.current->getId(),p.second->getId()) == nullptr)
             {
-                edge = p.second;
+                double dist = haversine(p.second->getLat(),p.second->getLon(),ant.current->getLat(),ant.current->getLon());
+                if (dist < minDist && !p.second->isVisited()) {
+                    minDist = dist;
+                    next = p.second;
+                }
             }
         }
-        Vertex* v = edge->getDest();
-        v->setVisited(true);
-        ant.visited.push_back(v->getId());
-        ant.distance += edge->getDistance();
-        ant.current = v;
+        for (auto p : ant.current->getAdj())
+        {
+            if (p.second->getDistance() < minDist && !p.second->getDest()->isVisited()) {
+                minDist = p.second->getDistance();
+                next = p.second->getDest();
+            }
+        }
+        next->setVisited(true);
+        ant.visited.push_back(next->getId());
+        ant.distance += minDist;
+        ant.current = next;
     }
-    ant.distance += g.findEdge(ant.current->getId(),0)->getDistance();
+    Edge* returnEdge = g.findEdge(ant.current->getId(),0);
+    if (returnEdge == nullptr)
+        returnEdge = g.findEdge(0,ant.current->getId());
+    ant.distance += returnEdge->getDistance();
     return {ant.distance,ant.visited};
 }
 

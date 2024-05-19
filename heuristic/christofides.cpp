@@ -22,25 +22,31 @@ Graph buildMST(Graph& g)
     {
         Edge shortestEdge = edgesQueue.top();
         edgesQueue.pop();
-        if (shortestEdge.getDest()->isVisited() && shortestEdge.getOrig()->isVisited() && shortestEdge.getDest()->getNum() == shortestEdge.getOrig()->getNum())
+        Vertex *original = res.findVertex(shortestEdge.getOrig()->getId());
+        Vertex *dest     = res.findVertex(shortestEdge.getDest()->getId());
+        if (original == nullptr) {
+            res.addVertex(shortestEdge.getOrig()->getId(),shortestEdge.getOrig()->getName());
+            original = res.findVertex(shortestEdge.getOrig()->getId());
+        }
+        if (dest == nullptr) {
+            res.addVertex(shortestEdge.getDest()->getId(),shortestEdge.getDest()->getName());
+            dest = res.findVertex(shortestEdge.getDest()->getId());
+        }
+        if (original->isVisited() && dest->isVisited() && original->getNum() == dest->getNum())
             continue;
-
-        Edge* newEdge = g.findEdge(shortestEdge.getOrig()->getId(),shortestEdge.getDest()->getId());
-        Vertex *original = newEdge->getOrig();
-        Vertex *dest = newEdge->getDest();
-
-
+        Edge* newEdge = g.findEdge(original->getId(),dest->getId());
         if (original->isVisited() && dest->isVisited()) {
             scc--;
             int originNum = original->getNum();
             int destNum = dest->getNum();
-            for (auto pair1 : g.getVertexSet())
+            for (auto pair1 : res.getVertexSet())
             {
                 if (pair1.second->getNum() == originNum)
                     pair1.second->setNum(destNum);
             }
 
         }else if(!original->isVisited() && !dest->isVisited()) {
+
             original->setVisited(true);
             original->setNum(index);
             dest->setVisited(true);
@@ -49,20 +55,16 @@ Graph buildMST(Graph& g)
             treeSize += 2;
             index++;
             scc++;
-            res.addVertex(original->getId(), original->getName(), original->getLat(), original->getLon());
-            res.addVertex(dest->getId(), dest->getName(), dest->getLat(), dest->getLon());
 
         }else {
             if (!original->isVisited()) {
                 treeSize++;
                 original->setVisited(true);
                 original->setNum(dest->getNum());
-                res.addVertex(original->getId(), original->getName(), original->getLat(), original->getLon());
             } else if (!dest->isVisited()) {
                 treeSize++;
                 dest->setVisited(true);
                 dest->setNum(original->getNum());
-                res.addVertex(dest->getId(), dest->getName(), dest->getLat(), dest->getLon());
             }
 
         }
@@ -79,48 +81,13 @@ Graph buildMST(Graph& g)
     return res;
 }
 
-Edge* getMSTEdge(const vector<Vertex*>& tree)
+double calculateMSTDist(const vector<int>& res, Graph& fullGraph)
 {
-    Edge* res = nullptr;
-    auto minDist = DBL_MAX;
-    for (Vertex* vertex : tree)
-    {
-        for (pair<int,Edge*> edge : vertex->getAdj())
-        {
-            if (!edge.second->getDest()->isVisited() && edge.second->getDistance() < minDist)
-            {
-                res = edge.second;
-                minDist = edge.second->getDistance();
-            }
-        }
-    }
-    return res;
-}
-
-pair<vector<int>,double> christofides(Graph& g, Graph& fullGraph)
-{
-    set<Vertex*> oddWeightedVertexes;
-    for (pair<int,Vertex*> vertex : g.getVertexSet())
-    {
-        if (vertex.second->getAdj().size() % 2 != 0)
-            oddWeightedVertexes.insert(vertex.second);
-    }
-    cout<<"making perfect\n";
-    makeGraphPerfect(oddWeightedVertexes, g, fullGraph);
-
-
-    vector<int> eulerPath = {0};
-    Vertex* origin = g.findVertex(0);
-    buildEulerTour(origin,eulerPath);
-
-    vector<int> res = buildTSPtour(eulerPath);
-
-    g.eraseCopyEdges();
     double dist = 0;
     size_t last = res.size()-1;
     for (int i = 0; i < last; i++){
-        Vertex* currPoint = g.findVertex(res[i]);
-        Vertex* nextPoint = g.findVertex(res[i+1]);
+        Vertex* currPoint = fullGraph.findVertex(res[i]);
+        Vertex* nextPoint = fullGraph.findVertex(res[i+1]);
 
         Edge* edge = fullGraph.findEdge(currPoint->getId(),nextPoint->getId());
         if (edge == nullptr)
@@ -132,7 +99,59 @@ pair<vector<int>,double> christofides(Graph& g, Graph& fullGraph)
         returnEdge = fullGraph.findEdge(0,res[last]);
     }
     dist += returnEdge->getDistance();
+    return dist;
+}
 
+double run2opt(vector<int>& res, Graph& fullGraph)
+{
+    double minDist = calculateMSTDist(res,fullGraph);
+    size_t maxIndex = res.size()-1;
+    vector<int> alternativePath;
+    for (int i = 1; i < maxIndex ; ++i)
+    {
+        for (int e = i+2; e<= maxIndex; e++)
+        {
+            int iCopy = i;
+            int eCopy = e;
+            alternativePath = res;
+            alternativePath[i] = res[e];
+            alternativePath[e] = res[i];
+            while (iCopy < eCopy)
+            {
+                iCopy++;
+                eCopy--;
+                alternativePath[iCopy] = res[eCopy];
+                alternativePath[eCopy] = res[iCopy];
+            }
+            double dist = calculateMSTDist(alternativePath,fullGraph);
+            if (dist < minDist)
+            {
+                res = alternativePath;
+                minDist = dist;
+            }
+        }
+    }
+    return minDist;
+}
+
+pair<vector<int>,double> christofides(Graph& g, Graph& fullGraph)
+{
+    set<Vertex*> oddWeightedVertexes;
+    for (pair<int,Vertex*> vertex : g.getVertexSet())
+    {
+        if (vertex.second->getAdj().size() % 2 != 0)
+            oddWeightedVertexes.insert(vertex.second);
+    }
+    cout<<"Making Graph perfect\n";
+    makeGraphPerfect(oddWeightedVertexes, g, fullGraph);
+
+
+    vector<int> eulerPath = {0};
+    Vertex* origin = g.findVertex(0);
+    buildEulerTour(origin,eulerPath);
+    cout<<"Building tour\n";
+    vector<int> res = buildTSPtour(eulerPath);
+    double dist = calculateMSTDist(res,fullGraph);
     return {res,dist};
 }
 
@@ -148,11 +167,8 @@ void makeGraphPerfect(set<Vertex*> oddWeightedVertexes, Graph& g, Graph& fullGra
                 edge = fullGraph.findEdge(vertex2->getId(),vertex1->getId());
             double distance = edge->getDistance();
             Edge newEdge = Edge(vertex1,vertex2, distance);
-            Edge newEdge2 = Edge(vertex2,vertex1, distance);
 
             edgesQueue.push(newEdge);
-            edgesQueue.push(newEdge2);
-
         }
     }
 

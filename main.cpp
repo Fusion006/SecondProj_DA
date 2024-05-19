@@ -240,6 +240,7 @@ void Run(Graph& g, bool isRealWorld){
              "'2' to execute a triangular approximation Heuristic algorithm;" << endl <<
              "'3' to execute our Heuristic algorithm;" << endl <<
              "'4' to execute our Heuristic algorithm for non-fully connected graphs;" << endl <<
+             "'5' to execute our Heuristic algorithm with 2k-opt (not good for big graphs)" << endl <<
              "'close' to exit the program." << endl << endl <<
              "DISCLAIMER: If you choose the option 1 it is advised to use only the Toy graphs!" << endl;
 
@@ -265,6 +266,7 @@ void Run(Graph& g, bool isRealWorld){
         }
 
         else if(order == "3"){
+
             auto start = chrono::high_resolution_clock::now();
             cout << "Building MST\n";
             Graph g2 = buildMST(g);
@@ -273,9 +275,23 @@ void Run(Graph& g, bool isRealWorld){
 
             chrono::duration<double> duration = end - start;
             printPath(path.first,path.second,0,duration);
+
         }
 
         else if(order == "4") printTwoOptApproximation(g);
+
+        else if(order == "5") {
+            auto start = chrono::high_resolution_clock::now();
+            cout << "Building MST\n";
+            Graph g2 = buildMST(g);
+            pair<vector<int>, double> path = christofides(g2, g);
+            auto end = chrono::high_resolution_clock::now();
+
+            double dist = run2opt(path.first, g);
+
+            chrono::duration<double> duration = end - start;
+            printPath(path.first,dist,0,duration);
+        }
 
         else cout << "Insert a valid number!" << endl;
     }
