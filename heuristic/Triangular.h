@@ -17,16 +17,15 @@ using namespace std;
 
 /** @brief Performs a depth-first search (dfs) in the MST of graph @param g from the @param source node.
  * Complexity: O(V + E).
- * @param g graph selected by user.
+ * @param g MST graph from the original graph selected by user.
  * @param source source node where the traversal starts.
  * @return vector with the nodes id in pre-order order.
  */
 vector<int> dfsMST(Graph& g, const int& source);
 /** @brief Auxiliary function that visits a vertex @param v and its adjacent, recursively.
  * Updates a parameter with the list of visited node contents.
- * It considers only the edges that have the selected attribute to true.
  * Complexity: O(V + E).
- * @param g graph selected by user.
+ * @param g MST graph from the original graph selected by user.
  * @param v current node being explored.
  * @param res current order of nodes visited so far.
  */

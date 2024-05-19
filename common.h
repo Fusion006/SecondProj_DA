@@ -34,26 +34,11 @@ Vertex* getNodeInput(Graph& g, string& order, int& rootV);
  * @param duration duration of the search for path in seconds.
  */
 void printPath(const vector<int>& resVec, const double& res, const int& rootV, chrono::duration<double> duration);
-/**
- *
- * @param g
- * @return
- */
+
 bool checkIfFullyConnected(Graph& g);
-/**
- *
- * @param g
- * @param v
- * @param s
- * @param l
- * @param i
- */
+
 void dfs_scc(Graph&g, Vertex *v, stack<int> &s, vector<set<int>> &l, int &i);
-/**
- *
- * @param g
- * @return
- */
+
 vector<set<int>> sccTarjan(Graph& g);
 
 #endif //SECOND_PROJ_DA_COMMON_H

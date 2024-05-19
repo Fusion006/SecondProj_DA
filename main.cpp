@@ -85,6 +85,32 @@ Graph buildMediumGraph(const string& dirpath, const string& filename, const int&
 {
     Graph g;
     string line;
+
+    ifstream nodesFile(dirpath+"nodes.csv");
+    if (nodesFile.is_open())
+    {
+        getline(nodesFile,line);
+        for (int i = 0; i < numOfNodes; i++) {
+            getline(nodesFile,line);
+            istringstream stringline(line);
+            string point; getline(stringline,point,',');
+            string lon; getline(stringline,lon,',');
+            string lat; getline(stringline,lat,',');
+
+            g.addVertex(stoi(point),point);
+            Vertex* vertex = g.findVertex(stoi(point));
+            if (vertex != nullptr)
+            {
+                vertex->setLat(stod(lat));
+                vertex->setLon(stod(lon));
+            }
+
+        }
+    }else{
+        cout << "Error in reading complex Graph file not found";
+        exit(EXIT_FAILURE);
+    }
+
     ifstream edgesFile(dirpath+filename);
     if (edgesFile.is_open())
     {
@@ -94,41 +120,16 @@ Graph buildMediumGraph(const string& dirpath, const string& filename, const int&
             string pointB; getline(stringline,pointB,',');
             string distance; getline(stringline,distance,',');
 
-            int A_id = stoi(pointA); int B_id = stoi(pointB);
-            Vertex* A = g.findVertex(A_id);
-            Vertex* B = g.findVertex(B_id);
-            if (A == nullptr){
-                g.addVertex(A_id,pointA);
-                A = g.findVertex(A_id);
-            }
-            if (B == nullptr){
-                g.addVertex(B_id,pointB);
-                B = g.findVertex(B_id);
-            }
-            A->addEdge(B,stod(distance));
-        }
-    }else{
-        cout << "Error in reading complex Graph file not found";
-        exit(EXIT_FAILURE);
-    }
-
-    ifstream nodesFile(dirpath+"nodes.csv");
-    if (nodesFile.is_open())
-    {
-        getline(nodesFile,line);
-        while (getline(nodesFile,line)) {
-            istringstream stringline(line);
-            string point; getline(stringline,point,',');
-            string lon; getline(stringline,lon,',');
-            string lat; getline(stringline,lat,',');
-
-            Vertex* vertex = g.findVertex(stoi(point));
-            if (vertex != nullptr)
+            if (!g.addEdge(stoi(pointA), stoi(pointB), stod(distance)))
             {
-                vertex->setLat(stod(lat));
-                vertex->setLon(stod(lon));
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
             }
-
+            if (!g.addEdge(stoi(pointB), stoi(pointA), stod(distance)))
+            {
+                cout << "Error in reading complex Graph couldn't add edge";
+                exit(EXIT_FAILURE);
+            }
         }
     }else{
         cout << "Error in reading complex Graph file not found";
@@ -251,13 +252,7 @@ void Run(Graph& g, bool isRealWorld){
             return;
         }
         else if(order == "1") {
-            completeGraph(g);
             printBacktrackingSolution(g);
-        }
-
-        else if(order == "2") {
-            completeGraph(g);
-            printTriangularTSPAproximation(g);
         }
 
         else if(order == "2") {

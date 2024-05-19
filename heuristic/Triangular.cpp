@@ -30,7 +30,6 @@ void dfsVisitMST(Graph& g, Vertex *v, vector<int> & res) {
     v->setVisited(true);
     res.push_back(v->getId());
     for (auto & e : v->getAdj()) {
-        if (!e.second->getSelected()) continue;
         auto w = e.second->getDest();
         if (!w->isVisited()) {
             dfsVisitMST(g, w, res);
@@ -39,8 +38,8 @@ void dfsVisitMST(Graph& g, Vertex *v, vector<int> & res) {
 }
 
 vector<int> triangularAproxiamtion(Graph& g, const int& root, double& res) {
-    buildMST(g);
-    vector<int> resVec = dfsMST(g, root);
+    Graph g2 = buildMST(g);
+    vector<int> resVec = dfsMST(g2, root);
     auto itStart = resVec.begin(), itEnd = resVec.begin() +1;
 
     while (itEnd != resVec.end()) {

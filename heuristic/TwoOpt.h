@@ -2,6 +2,12 @@
 #ifndef SECOND_PROJ_DA_TWOOPT_H
 #define SECOND_PROJ_DA_TWOOPT_H
 
+
+/** @defgroup  TwoOpt TwoOpt
+ * @{
+*
+* Functions used to find the optimal path that solves the TSP problem for non fully connected graphs, using the Two optimization algorithm
+*/
 #include "../common.h"
 #include "../Graph.h"
 #include <algorithm>
